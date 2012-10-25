@@ -12,7 +12,23 @@
  */
 class Peach_Config
 {
-    // TODO
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        // TODO
+    }
+
+    /**
+     * Convert structure to array
+     * 
+     * @return array
+     */
+    public function toArray()
+    {
+        // TODO
+    }
 }
 
 /* EOF */
