@@ -99,14 +99,8 @@ class Peach_Db
      */
     protected static function _formatAdapterName($adapterName)
     {
-        // split in words
-        $adapterName = str_replace('_', ' ', $adapterName);
-        
-        // make first letter uppercase for all words
-        $adapterName = ucwords($adapterName);
-        
         // replace back the space with underscore
-        $formattedAdapterName = str_replace(' ', '_', $adapterName);
+        $formattedAdapterName = str_replace(' ', '_', ucwords(str_replace('_', ' ', $adapterName)));
         
         return $formattedAdapterName;
     }
