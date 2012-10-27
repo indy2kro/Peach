@@ -43,6 +43,13 @@ class Peach_Config implements Countable, Iterator
     protected $_count = 0;
     
     /**
+     * Current index
+     * 
+     * @var integer
+     */
+    protected $_index = 0;
+    
+    /**
      * Load file error string.
      *
      * Is null if there was no error while file loading

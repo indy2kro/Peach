@@ -50,11 +50,11 @@ class Peach_Config_Ini extends Peach_Config
         
         $iniArray = $this->_loadIniFile($filename);
 
-        if (null === $section) {
+        if (is_null($section)) {
             // Load entire file
             $dataArray = array();
             foreach ($iniArray as $sectionName => $sectionData) {
-                if(!is_array($sectionData)) {
+                if (!is_array($sectionData)) {
                     $dataArray = $this->_arrayMergeRecursive($dataArray, $this->_processKey(array(), $sectionName, $sectionData));
                 } else {
                     $dataArray[$sectionName] = $this->_processSection($iniArray, $sectionName);
