@@ -7,4 +7,9 @@
     <logging>
         <log type="coverage-html" target="./codecoverage" charset="UTF-8" />
     </logging>
+    <php>
+        <date>
+            <timezone>Europe/Bucharest</timezone>
+        </date>
+    </php>
 </phpunit>
