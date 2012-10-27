@@ -42,13 +42,15 @@ class Peach_Autoloader
         'Peach_'
     );
     
+    // @codeCoverageIgnoreStart
     /**
      * Constructor
      */
     protected function __construct()
     {
-        // singleton
+        // singleton  
     }
+    // @codeCoverageIgnoreEnd
     
     /**
      * Get instance
