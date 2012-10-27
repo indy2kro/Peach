@@ -12,18 +12,12 @@
  */
 class PeachTest_Config_Ini_Test extends PHPUnit_Framework_TestCase
 {
-    /**
-     * Test invalid file
-     */
     public function testEmptyIniFileName()
     {
         $this->setExpectedException('Peach_Config_Exception');
         new Peach_Config_Ini('');
     }
     
-    /**
-     * Test invalid file
-     */
     public function testInvalidIniFile()
     {
         $invalidFile = dirname(__FILE__) . '/_files/invalid.ini';
@@ -32,9 +26,6 @@ class PeachTest_Config_Ini_Test extends PHPUnit_Framework_TestCase
         new Peach_Config_Ini($invalidFile);
     }
     
-    /**
-     * Test invalid file
-     */
     public function testInvalidMultipleExtends()
     {
         $invalidFile = dirname(__FILE__) . '/_files/multiple.ini';
@@ -43,9 +34,6 @@ class PeachTest_Config_Ini_Test extends PHPUnit_Framework_TestCase
         new Peach_Config_Ini($invalidFile);
     }
     
-    /**
-     * Test invalid file
-     */
     public function testInvalidNonExistentExtend()
     {
         $invalidFile = dirname(__FILE__) . '/_files/nonexistent.ini';
@@ -54,9 +42,6 @@ class PeachTest_Config_Ini_Test extends PHPUnit_Framework_TestCase
         new Peach_Config_Ini($invalidFile);
     }
     
-    /**
-     * Test invalid file
-     */
     public function testInvalidnesting()
     {
         $invalidFile = dirname(__FILE__) . '/_files/invalidnest.ini';
@@ -65,9 +50,6 @@ class PeachTest_Config_Ini_Test extends PHPUnit_Framework_TestCase
         new Peach_Config_Ini($invalidFile);
     }
     
-    /**
-     * Test valid file
-     */
     public function testValidIniFile()
     {
         $validFile = dirname(__FILE__) . '/_files/valid.ini';
@@ -81,9 +63,6 @@ class PeachTest_Config_Ini_Test extends PHPUnit_Framework_TestCase
         $this->assertEquals($config->section2->key22, 'value22');
     }
     
-    /**
-     * Test section load
-     */
     public function testLoadSection()
     {
         $validFile = dirname(__FILE__) . '/_files/valid.ini';
@@ -93,9 +72,6 @@ class PeachTest_Config_Ini_Test extends PHPUnit_Framework_TestCase
         $this->assertEquals($config->key11, 'value11');
     }
     
-    /**
-     * Test section load
-     */
     public function testLoadNonExistentSection()
     {
         $validFile = dirname(__FILE__) . '/_files/valid.ini';
@@ -104,9 +80,6 @@ class PeachTest_Config_Ini_Test extends PHPUnit_Framework_TestCase
         new Peach_Config_Ini($validFile, 'NonExistent');
     }
     
-    /**
-     * Test section load
-     */
     public function testLoadAlreadyExistingNest()
     {
         $validFile = dirname(__FILE__) . '/_files/invalidnest2.ini';
@@ -115,9 +88,6 @@ class PeachTest_Config_Ini_Test extends PHPUnit_Framework_TestCase
         new Peach_Config_Ini($validFile);
     }
     
-    /**
-     * Test nested sections
-     */
     public function testNestedSections()
     {
         $validFile = dirname(__FILE__) . '/_files/valid.ini';
