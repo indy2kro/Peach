@@ -19,7 +19,36 @@ class Peach_Log_Event
     const EVENT_PRIORITY = 'priority';
     const EVENT_EXTRAS = 'extras';
     const EVENT_STRING = 'string';
+    const EVENT_TIMESTAMP = 'timestamp';
     
+    /*
+     * Priority names
+     */
+    const PRIORITY_EMERGENCY = 'EMERG';
+    const PRIORITY_ALERT = 'ALERT';
+    const PRIORITY_CRITICAL = 'CRIT';
+    const PRIORITY_ERROR = 'ERROR';
+    const PRIORITY_WARNING = 'WARN';
+    const PRIORITY_NOTICE = 'NOTICE';
+    const PRIORITY_INFO = 'INFO';
+    const PRIORITY_DEBUG = 'DEBUG';
+    
+    /**
+     * Priority mapping
+     * 
+     * @var array
+     */
+    protected $_priorityMap = array(
+        Peach_Log::EMERGENCY => self::PRIORITY_EMERGENCY,
+        Peach_Log::ALERT => self::PRIORITY_ALERT,
+        Peach_Log::CRITICAL => self::PRIORITY_CRITICAL,
+        Peach_Log::ERROR => self::PRIORITY_ERROR,
+        Peach_Log::WARNING => self::PRIORITY_WARNING,
+        Peach_Log::NOTICE => self::PRIORITY_NOTICE,
+        Peach_Log::INFO => self::PRIORITY_INFO,
+        Peach_Log::DEBUG => self::PRIORITY_DEBUG,
+    );
+
     /**
      * Event information
      * 
@@ -29,7 +58,8 @@ class Peach_Log_Event
         self::EVENT_MESSAGE => null,
         self::EVENT_PRIORITY => null,
         self::EVENT_EXTRAS => array(),
-        self::EVENT_STRING => null
+        self::EVENT_STRING => null,
+        self::EVENT_TIMESTAMP => null
     );
     
     /**
@@ -39,12 +69,19 @@ class Peach_Log_Event
      * @param integer $priority
      * @param array   $extras
      * @return void
+     * @throws Peach_Log_Exception
      */
     public function __construct($message, $priority, Array $extras = array())
     {
+        // validate priority
+        if (!isset($this->_priorityMap[$priority])) {
+            throw new Peach_Log_Exception('Invalid priority received: ' . $priority);
+        }
+        
         $this->_event[self::EVENT_MESSAGE] = $message;
         $this->_event[self::EVENT_PRIORITY] = $priority;
         $this->_event[self::EVENT_EXTRAS] = $extras;
+        $this->_event[self::EVENT_TIMESTAMP] = time();
     }
     
     /**
@@ -76,6 +113,22 @@ class Peach_Log_Event
     public function getPriority()
     {
         return $this->_event[self::EVENT_PRIORITY];
+    }
+    
+    /**
+     * Get priority name
+     * 
+     * @return string
+     */
+    public function getPriorityName()
+    {
+        // get event priority
+        $priority = $this->_event[self::EVENT_PRIORITY];
+        
+        // get priority name
+        $priorityName = $this->_priorityMap[$priority];
+        
+        return $priorityName;
     }
     
     /**
@@ -113,6 +166,16 @@ class Peach_Log_Event
     public function setString($string)
     {
         $this->_event[self::EVENT_STRING] = (string)$string;
+    }
+    
+    /**
+     * Get event timestamp
+     * 
+     * @return integer
+     */
+    public function getTimestamp()
+    {
+        return $this->_event[self::EVENT_TIMESTAMP];
     }
     
     /**

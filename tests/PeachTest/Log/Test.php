@@ -1,0 +1,106 @@
+<?php
+/**
+ * Peach Library tests
+ *
+ * @category   PeachTest
+ * @package    PeachTest
+ * @copyright  Copyright (c) 2012 Peach Library
+ */
+
+/**
+ * Peach_Log tests
+ */
+class PeachTest_Log_Test extends PHPUnit_Framework_TestCase
+{
+    /**
+     * Log file
+     * 
+     * @var string
+     */
+    protected $_logFile;
+    
+    public function __construct($name = NULL, array $data = array(), $dataName = '')
+    {
+        parent::__construct($name, $data, $dataName);
+        
+        // set log file
+        $this->_logFile = dirname(__FILE__) . '/_files/test.log';
+    }
+        
+    public function tearDown()
+    {
+        parent::tearDown();
+        
+        if (file_exists($this->_logFile)) {
+            //unlink($this->_logFile);
+        }
+    }
+    
+    public function testConstructor()
+    {
+        // default options
+        $log = new Peach_Log();
+        
+        $this->assertInstanceOf('Peach_Log', $log);
+        
+        // custom array options
+        $options = array(
+            Peach_Log::OPT_TRACK_MEMORY_USAGE => false
+        );
+        
+        $log = new Peach_Log($options);
+        $this->assertInstanceOf('Peach_Log', $log);
+        
+        // custom ini config options
+        $configFile = dirname(__FILE__) . '/_files/config.ini';
+        $iniOptions = new Peach_Config_Ini($configFile);
+        
+        $log = new Peach_Log($iniOptions);
+        $this->assertInstanceOf('Peach_Log', $log);
+    }
+    
+    public function testFileSimple()
+    {
+        $writer = new Peach_Log_Writer_File($this->_logFile);
+        
+        $filter = new Peach_Log_Filter_Priority(Peach_Log::INFO);
+        $writer->addFilter($filter);
+        
+        $formatter = new Peach_Log_Writer_Formatter_Simple();
+        $writer->setFormatter($formatter);
+        
+        // default options
+        $log = new Peach_Log();
+        $log->addWriter($writer);
+        
+        $log->info('Test message');
+    }
+    
+    public function testFileStandard()
+    {
+        $writer = new Peach_Log_Writer_File($this->_logFile);
+        
+        $filter = new Peach_Log_Filter_Priority(Peach_Log::INFO);
+        $writer->addFilter($filter);
+        
+        $formatter = new Peach_Log_Writer_Formatter_Standard();
+        $writer->setFormatter($formatter);
+        
+        // custom array options
+        $options = array(
+            Peach_Log::OPT_TRACK_MEMORY_USAGE => true,
+            Peach_Log::OPT_COMPUTE_MICROSECONDS => true,
+            Peach_Log::OPT_TRACK_MEMORY_USAGE => true
+        );
+        
+        // default options
+        $log = new Peach_Log($options);
+        $log->addWriter($writer);
+        
+        $log->info('Test message1');
+        $log->debug('Test message2');
+        $log->warning('Test message3');
+    }
+}
+
+/* EOF */

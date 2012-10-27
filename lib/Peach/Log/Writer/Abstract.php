@@ -13,6 +13,13 @@
 abstract class Peach_Log_Writer_Abstract
 {
     /**
+     * Options
+     * 
+     * @var array
+     */
+    protected $_options = array();
+    
+    /**
      * Formatter attached
      * 
      * @var array
@@ -25,6 +32,17 @@ abstract class Peach_Log_Writer_Abstract
      * @var array
      */
     protected $_filters = array();
+    
+    /**
+     * Set options
+     * 
+     * @param array|Peach_Config $options
+     * @return void
+     */
+    public function setOptions($options = array())
+    {
+        $this->_options = array_merge($this->_options, $options);
+    }
 
     /**
      * Add formatter to log
@@ -32,7 +50,7 @@ abstract class Peach_Log_Writer_Abstract
      * @param Peach_Log_Formatter_Abstract $formatter
      * @return void
      */
-    public function setormatter(Peach_Log_Formatter_Abstract $formatter)
+    public function setFormatter(Peach_Log_Writer_Formatter_Abstract $formatter)
     {
         $this->_formatter = $formatter;
     }
