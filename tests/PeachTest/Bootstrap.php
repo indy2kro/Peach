@@ -51,11 +51,10 @@ class PeachTest_Bootstrap
      */
     protected function _initAutoloader()
     {
-        require_once dirname(dirname(dirname(__FILE__))) . '/lib/Peach/Autoloader.php';
+        require_once dirname(__FILE__) . '/Autoloader.php';
 
-        $autoloader = Peach_Autoloader::getInstance();
+        $autoloader = PeachTest_Autoloader::getInstance();
         $autoloader->register();
-        $autoloader->registerNamespace('PeachTest_');
     }
 }
 
