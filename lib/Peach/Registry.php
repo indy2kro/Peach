@@ -120,7 +120,7 @@ class Peach_Registry extends ArrayObject
      */
     protected static function _init()
     {
-        self::$_registry = new Peach_Registry(array(), self::ARRAY_AS_PROPS);
+        self::$_registry = new self(array(), self::ARRAY_AS_PROPS);
     }
 }
 
