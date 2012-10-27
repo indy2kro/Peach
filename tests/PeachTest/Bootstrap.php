@@ -20,6 +20,9 @@ class PeachTest_Bootstrap
         // set error reporting level
         $this->_setErrorReporting();
         
+        // set timezone
+        $this->_setTimezone();
+        
         // set include path
         $this->_setIncludePath();
         
@@ -44,6 +47,14 @@ class PeachTest_Bootstrap
                 get_include_path() . PATH_SEPARATOR . dirname(dirname(__FILE__))
                 . PATH_SEPARATOR . dirname(dirname(dirname(__FILE__))) . '/lib/'
         );
+    }
+    
+    /**
+     * Set timezone
+     */
+    protected function _setTimezone()
+    {
+        date_default_timezone_set('UTC');
     }
     
     /**
