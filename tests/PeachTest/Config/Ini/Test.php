@@ -128,7 +128,6 @@ class PeachTest_Config_Ini_Test extends PHPUnit_Framework_TestCase
         $this->assertEquals($config->nested1->key31, 'value31');
         $this->assertEquals($config->nested1->key11, 'value11');
     }
-    
 }
 
 /* EOF */
