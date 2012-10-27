@@ -186,12 +186,7 @@ class Peach_Config_Ini extends Peach_Config
             $pieces = explode($this->_options[self::OPT_NEST_SEPARATOR], $key, 2);
             if (strlen($pieces[0]) && strlen($pieces[1])) {
                 if (!isset($config[$pieces[0]])) {
-                    if ($pieces[0] === '0' && !empty($config)) {
-                        // convert the current values in $config into an array
-                        $config = array($pieces[0] => $config);
-                    } else {
-                        $config[$pieces[0]] = array();
-                    }
+                    $config[$pieces[0]] = array();
                 } elseif (!is_array($config[$pieces[0]])) {
                     throw new Peach_Config_Exception("Cannot create sub-key for '{$pieces[0]}' as key already exists");
                 }
