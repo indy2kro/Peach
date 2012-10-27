@@ -90,7 +90,9 @@ abstract class Peach_Log_Writer_Abstract
         }
         
         // format event
-        $this->_formatter->format($event);
+        if (!is_null($this->_formatter)) {
+            $this->_formatter->format($event);
+        }
         
         // write event information
         $this->_write($event);

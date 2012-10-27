@@ -8,7 +8,7 @@
  */
 
 /**
- * Abstract log writer implementation
+ * File log writer implementation
  */
 class Peach_Log_Writer_File extends Peach_Log_Writer_Abstract
 {
@@ -60,7 +60,7 @@ class Peach_Log_Writer_File extends Peach_Log_Writer_Abstract
         $this->shutdown();
         
         // open log file
-        if (!$this->_stream = fopen($file, $mode)) {
+        if (!$this->_stream = @fopen($file, $mode)) {
             throw new Peach_Log_Exception("File '" . $file . "' cannot be opened for writing using mode '" . $mode . "'");
         }
     }
@@ -86,14 +86,13 @@ class Peach_Log_Writer_File extends Peach_Log_Writer_Abstract
      */
     protected function _write(Peach_Log_Event $event)
     {
-        // format event
-        $this->_formatter->format($event);
-        
         // get string
         $line = $event->toString();
         
         if (!is_resource($this->_stream)) {
+            // @codeCoverageIgnoreStart
             throw new Peach_Log_Exception('Invalid file resource');
+            // @codeCoverageIgnoreEnd
         }
 
         // if locking is active try to get an exclusive lock on the file
@@ -101,12 +100,16 @@ class Peach_Log_Writer_File extends Peach_Log_Writer_Abstract
             $result = flock($this->_stream, LOCK_EX);
             
             if (!$result) {
+                // @codeCoverageIgnoreStart
                 throw new Peach_Log_Exception('Failed to lock the log file');
+            // @codeCoverageIgnoreEnd
             }
         }
 
         if (false === fwrite($this->_stream, $line)) {
+            // @codeCoverageIgnoreStart
             throw new Peach_Log_Exception('Failed to write to stream');
+            // @codeCoverageIgnoreEnd
         }
         
         // unlock the file
@@ -114,7 +117,9 @@ class Peach_Log_Writer_File extends Peach_Log_Writer_Abstract
             $result = flock($this->_stream, LOCK_UN);
             
             if (!$result) {
+                // @codeCoverageIgnoreStart
                 throw new Peach_Log_Exception('Failed to unlock the log file');
+                // @codeCoverageIgnoreEnd
             }
         }
     }

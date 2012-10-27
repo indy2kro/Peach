@@ -286,6 +286,17 @@ class Peach_Log
     }
     
     /**
+     * Log message on ALERT level
+     *
+     * @param string $message Message to log
+     * @return void
+     */
+    public function alert($message)
+    {
+        $this->log($message, self::ALERT);
+    }
+    
+    /**
      * Log message on EMERGENCY level
      *
      * @param string $message Message to log

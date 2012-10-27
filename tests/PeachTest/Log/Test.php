@@ -32,7 +32,7 @@ class PeachTest_Log_Test extends PHPUnit_Framework_TestCase
         parent::tearDown();
         
         if (file_exists($this->_logFile)) {
-            //unlink($this->_logFile);
+            unlink($this->_logFile);
         }
     }
     
@@ -90,16 +90,36 @@ class PeachTest_Log_Test extends PHPUnit_Framework_TestCase
         $options = array(
             Peach_Log::OPT_TRACK_MEMORY_USAGE => true,
             Peach_Log::OPT_COMPUTE_MICROSECONDS => true,
-            Peach_Log::OPT_TRACK_MEMORY_USAGE => true
+            Peach_Log::OPT_TRACK_DURATION => true
         );
         
         // default options
         $log = new Peach_Log($options);
         $log->addWriter($writer);
         
-        $log->info('Test message1');
-        $log->debug('Test message2');
-        $log->warning('Test message3');
+        $log->debug('Test message1');
+        $log->info('Test message2');
+        $log->notice('Test message3');
+        $log->warning('Test message4');
+        $log->error('Test message5');
+        $log->critical('Test message6');
+        $log->alert('Test message7');
+        $log->emergency('Test message8');
+        
+        $log->setEventItem('extra_item', 'extra_value');
+        
+        $memory = $log->getMemoryStatistics();
+        $this->assertArrayHasKey('min', $memory);
+        $this->assertArrayHasKey('max', $memory);
+    }
+    
+    public function testFileWrongPriority()
+    {
+        // default options
+        $log = new Peach_Log();
+        
+        $this->setExpectedException('Peach_Log_Exception');
+        $log->log('test message', 999);
     }
 }
 
