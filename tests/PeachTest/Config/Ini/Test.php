@@ -120,6 +120,53 @@ class PeachTest_Config_Ini_Test extends PHPUnit_Framework_TestCase
         $this->setExpectedException('Peach_Config_Exception');
         new Peach_Config_Ini($validFile);
     }
+    
+    public function testLoadString()
+    {
+        $string = 'out1 = value1
+section1.key11 = already1
+
+[section1]
+
+key11 = value11
+sub1.key1 = value1
+sub1.key2 = value2
+
+[section2]
+
+key21 = value21
+key22 = value22';
+        
+        $config = new Peach_Config_Ini();
+        $config->loadString($string);
+        $this->assertInstanceOf('Peach_Config_Ini', $config);
+        $this->assertInstanceOf('Peach_Config', $config->section1);
+        $this->assertEquals($config->out1, 'value1');
+        $this->assertEquals($config->section1->key11, 'value11');
+        $this->assertEquals($config->section2->key21, 'value21');
+        $this->assertEquals($config->section2->key22, 'value22');
+    }
+    
+    public function testLoadStringException()
+    {
+        $string = 'out1 == value1
+section1.key11 = already1';
+        
+        $this->setExpectedException('Peach_Config_Exception');
+        
+        $config = new Peach_Config_Ini();
+        $config->loadString($string);
+    }
+    
+    public function testLoadEmptyString()
+    {
+        $string = '';
+        
+        $this->setExpectedException('Peach_Config_Exception');
+        
+        $config = new Peach_Config_Ini();
+        $config->loadString($string);
+    }
 }
 
 /* EOF */

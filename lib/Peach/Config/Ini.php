@@ -39,19 +39,66 @@ class Peach_Config_Ini extends Peach_Config
      * @param string $section
      * @param arrray $options
      * @return void
+     */
+    public function __construct($filename = null, $section = null, Array $options = array())
+    {
+        // set options
+        $this->setOptions($options);
+
+        if (!is_null($filename)) {
+            $this->loadFile($filename, $section);
+        }
+    }
+    
+    /**
+     * Load file
+     * 
+     * @param string $filename
+     * @param string $section
      * @throws Peach_Config_Exception
      */
-    public function __construct($filename, $section = null, Array $options = array())
+    public function loadFile($filename, $section = null)
     {
         if (empty($filename)) {
             throw new Peach_Config_Exception('Filename can not be empty');
         }
-        
-        // set options
-        $this->setOptions($options);
-        
+
+        // load INI file into array
         $iniArray = $this->_loadIniFile($filename);
 
+        // load INI array
+        $this->_loadIniArray($iniArray, $section);
+    }
+    
+    /**
+     * Load string
+     * 
+     * @param string $string
+     * @param string $section
+     * @throws Peach_Config_Exception
+     */
+    public function loadString($string, $section = null)
+    {
+        if (empty($string)) {
+            throw new Peach_Config_Exception('String can not be empty');
+        }
+
+        // load INI string into array
+        $iniArray = $this->_loadIniString($string);
+        
+        // load INI array
+        $this->_loadIniArray($iniArray, $section);
+    }
+    
+    /**
+     * Load INI array
+     * 
+     * @param array  $iniArray
+     * @param string $section
+     * @throws Peach_Config_Exception
+     */
+    protected function _loadIniArray(Array $iniArray, $section = null)
+    {
         if (is_null($section)) {
             // Load entire file
             $dataArray = array();
@@ -62,7 +109,7 @@ class Peach_Config_Ini extends Peach_Config
                     $dataArray[$sectionName] = $this->_processSection($iniArray, $sectionName);
                 }
             }
-            parent::__construct($dataArray, $options);
+            $this->loadArray($dataArray);
         } else {
             // Load one or more sections
             if (!is_array($section)) {
@@ -71,12 +118,12 @@ class Peach_Config_Ini extends Peach_Config
             $dataArray = array();
             foreach ($section as $sectionName) {
                 if (!isset($iniArray[$sectionName])) {
-                    throw new Peach_Config_Exception("Section '$sectionName' cannot be found in $filename");
+                    throw new Peach_Config_Exception("Section '" . $sectionName . "' cannot be found");
                 }
                 $dataArray = $this->_arrayMergeRecursive($this->_processSection($iniArray, $sectionName), $dataArray);
 
             }
-            parent::__construct($dataArray, $options);
+            $this->loadArray($dataArray);
         }
     }
     
@@ -90,35 +137,84 @@ class Peach_Config_Ini extends Peach_Config
      */
     protected function _parseIniFile($filename)
     {
-        set_error_handler(array($this, '_loadFileErrorHandler'));
+        set_error_handler(array($this, '_loadErrorHandler'));
         $iniArray = parse_ini_file($filename, true); // Warnings and errors are suppressed
         restore_error_handler();
 
         // Check if there was a error while loading file
-        if ($this->_loadFileErrorStr !== null) {
-            throw new Peach_Config_Exception($this->_loadFileErrorStr);
+        if (!is_null($this->_loadErrorStr)) {
+            throw new Peach_Config_Exception($this->_loadErrorStr);
         }
 
         return $iniArray;
     }
 
     /**
-     * Load the ini file and preprocess the section separator (':' in the
-     * section name (that is used for section extension) so that the resultant
-     * array has the correct section names and the extension information is
-     * stored in a sub-key called ';extends'. We use ';extends' as this can
-     * never be a valid key name in an INI file that has been loaded using
-     * parse_ini_file().
+     * Load the INI string using parse_ini_string(). Use a private error
+     * handler to convert any loading errors into a Peach_Config_Exception
      *
-     * @param string $filename
+     * @param string $string
      * @return array
      * @throws Peach_Config_Exception
      */
+    protected function _parseIniString($string)
+    {
+        set_error_handler(array($this, '_loadErrorHandler'));
+        $iniArray = parse_ini_string($string, true); // Warnings and errors are suppressed
+        restore_error_handler();
+
+        // Check if there was a error while loading string
+        if (!is_null($this->_loadErrorStr)) {
+            throw new Peach_Config_Exception($this->_loadErrorStr);
+        }
+
+        return $iniArray;
+    }
+
+    /**
+     * Load the ini file
+     *
+     * @param string $filename
+     * @return array
+     */
     protected function _loadIniFile($filename)
     {
+        // parse ini file
         $loaded = $this->_parseIniFile($filename);
+        
+        // process extends sections
+        $iniArray = $this->_processExtends($loaded);
+
+        return $iniArray;
+    }
+
+    /**
+     * Load the ini string
+     *
+     * @param string $string
+     * @return array
+     */
+    protected function _loadIniString($string)
+    {
+        // parse INI string
+        $loaded = $this->_parseIniString($string);
+        
+        // process extends sections
+        $iniArray = $this->_processExtends($loaded);
+
+        return $iniArray;
+    }
+    
+    /**
+     * Process extends
+     * 
+     * @param array $array
+     * @return array
+     */
+    protected function _processExtends(Array $array)
+    {
         $iniArray = array();
-        foreach ($loaded as $key => $data) {
+        foreach ($array as $key => $data) {
             // get all items
             $extends = explode($this->_options[self::OPT_EXTEND_SEPARATOR], $key);
             // trim all section names

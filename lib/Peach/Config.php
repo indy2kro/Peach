@@ -56,7 +56,7 @@ class Peach_Config implements Countable, Iterator
      *
      * @var string
      */
-    protected $_loadFileErrorStr = null;
+    protected $_loadErrorStr = null;
     
     /**
      * This is used to track section inheritance. The keys are names of sections that
@@ -73,19 +73,13 @@ class Peach_Config implements Countable, Iterator
      * @param array $options Options
      * @return void
      */
-    public function __construct(Array $array, Array $options = array())
+    public function __construct(Array $array = array(), Array $options = array())
     {
+        // set options
         $this->setOptions($options);
         
-        $this->_data = array();
-        foreach ($array as $key => $value) {
-            if (is_array($value)) {
-                $this->_data[$key] = new self($value, $options);
-            } else {
-                $this->_data[$key] = $value;
-            }
-        }
-        $this->_count = count($this->_data);
+        // load array
+        $this->loadArray($array);
     }
     
     /**
@@ -181,6 +175,25 @@ class Peach_Config implements Countable, Iterator
     public function setOptions(Array $options = array())
     {
         $this->_options = array_merge($this->_options, $options);
+    }
+    
+    /**
+     * Load array
+     * 
+     * @param array $array
+     * @return void
+     */
+    public function loadArray(Array $array)
+    {
+        $this->_data = array();
+        foreach ($array as $key => $value) {
+            if (is_array($value)) {
+                $this->_data[$key] = new self($value, $this->_options);
+            } else {
+                $this->_data[$key] = $value;
+            }
+        }
+        $this->_count = count($this->_data);
     }
 
     /**
@@ -331,19 +344,19 @@ class Peach_Config implements Countable, Iterator
     }
 
     /**
-     * Handle any errors from simplexml_load_file or parse_ini_file
+     * Handle any errors from simplexml_load_file, parse_ini_file, parse_ini_string
      *
      * @param integer $errno
      * @param string  $errstr
      * @param string  $errfile
      * @param integer $errline
      */
-    protected function _loadFileErrorHandler($errno, $errstr, $errfile, $errline)
+    protected function _loadErrorHandler($errno, $errstr, $errfile, $errline)
     {
-        if (is_null($this->_loadFileErrorStr)) {
-            $this->_loadFileErrorStr = $errstr;
+        if (is_null($this->_loadErrorStr)) {
+            $this->_loadErrorStr = $errstr;
         } else {
-            $this->_loadFileErrorStr .= (PHP_EOL . $errstr);
+            $this->_loadErrorStr .= (PHP_EOL . $errstr);
         }
     }
     
