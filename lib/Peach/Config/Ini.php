@@ -17,6 +17,7 @@ class Peach_Config_Ini extends Peach_Config
      */
     const OPT_EXTEND_SEPARATOR = 'extend_separator';
     const OPT_NEST_SEPARATOR = 'nest_separator';
+    const OPT_EXTENDS_KEYWORD = 'extends_keyword';
     
     /**
      * Options
@@ -27,7 +28,8 @@ class Peach_Config_Ini extends Peach_Config
         self::OPT_READ_ONLY => true,
         self::OPT_SKIP_EXTENDS => false,
         self::OPT_EXTEND_SEPARATOR => ':',
-        self::OPT_NEST_SEPARATOR => '.'
+        self::OPT_NEST_SEPARATOR => '.',
+        self::OPT_EXTENDS_KEYWORD => ';extends'
     );
 
     /**
@@ -60,7 +62,7 @@ class Peach_Config_Ini extends Peach_Config
                     $dataArray[$sectionName] = $this->_processSection($iniArray, $sectionName);
                 }
             }
-            parent::__construct($dataArray);
+            parent::__construct($dataArray, $options);
         } else {
             // Load one or more sections
             if (!is_array($section)) {
@@ -74,7 +76,7 @@ class Peach_Config_Ini extends Peach_Config
                 $dataArray = $this->_arrayMergeRecursive($this->_processSection($iniArray, $sectionName), $dataArray);
 
             }
-            parent::__construct($dataArray);
+            parent::__construct($dataArray, $options);
         }
     }
     
@@ -117,20 +119,19 @@ class Peach_Config_Ini extends Peach_Config
         $loaded = $this->_parseIniFile($filename);
         $iniArray = array();
         foreach ($loaded as $key => $data) {
-            $pieces = explode($this->_options[self::OPT_EXTEND_SEPARATOR], $key);
-            $thisSection = trim($pieces[0]);
-            switch (count($pieces)) {
-                case 1:
-                    $iniArray[$thisSection] = $data;
-                    break;
-
-                case 2:
-                    $extendedSection = trim($pieces[1]);
-                    $iniArray[$thisSection] = array_merge(array(';extends'=>$extendedSection), $data);
-                    break;
-
-                default:
-                    throw new Peach_Config_Exception("Section '$thisSection' may not extend multiple sections in $filename");
+            // get all items
+            $extends = explode($this->_options[self::OPT_EXTEND_SEPARATOR], $key);
+            // trim all section names
+            $extends = array_map('trim', $extends);
+            
+            // get the section name
+            $thisSection = array_shift($extends);
+            
+            $iniArray[$thisSection] = $data;
+            
+            // extends 
+            if (!empty($extends)) {
+                $iniArray[$thisSection][$this->_options[self::OPT_EXTENDS_KEYWORD]] = $extends;
             }
         }
 
@@ -148,20 +149,21 @@ class Peach_Config_Ini extends Peach_Config
      * @throws Peach_Config_Exception
      * @return array
      */
-    protected function _processSection($iniArray, $section, $config = array())
+    protected function _processSection(Array $iniArray, $section, Array $config = array())
     {
         $thisSection = $iniArray[$section];
 
         foreach ($thisSection as $key => $value) {
-            if (strtolower($key) == ';extends') {
-                if (isset($iniArray[$value])) {
-                    $this->_assertValidExtend($section, $value);
-
-                    if (!$this->_options[self::OPT_SKIP_EXTENDS]) {
-                        $config = $this->_processSection($iniArray, $value, $config);
+            if ($key == $this->_options[self::OPT_EXTENDS_KEYWORD] && !$this->_options[self::OPT_SKIP_EXTENDS]) {
+                foreach ($value as $extended) {
+                    if (!isset($iniArray[$extended])) {
+                        throw new Peach_Config_Exception("Parent section '$extended' cannot be found");
                     }
-                } else {
-                    throw new Peach_Config_Exception("Parent section '$section' cannot be found");
+                    
+                    // check if the extend is valid - prevent circular extends
+                    $this->_assertValidExtend($section, $extended);
+
+                    $config = $this->_processSection($iniArray, $extended, $config);
                 }
             } else {
                 $config = $this->_processKey($config, $key, $value);
@@ -180,7 +182,7 @@ class Peach_Config_Ini extends Peach_Config
      * @return array
      * @throws Peach_Config_Exception
      */
-    protected function _processKey($config, $key, $value)
+    protected function _processKey(Array $config, $key, $value)
     {
         if (strpos($key, $this->_options[self::OPT_NEST_SEPARATOR]) !== false) {
             $pieces = explode($this->_options[self::OPT_NEST_SEPARATOR], $key, 2);
@@ -195,7 +197,9 @@ class Peach_Config_Ini extends Peach_Config
                 throw new Peach_Config_Exception("Invalid key '$key'");
             }
         } else {
-            $config[$key] = $value;
+            if (!isset($config[$key])) {
+                $config[$key] = $value;
+            }
         }
         return $config;
     }

@@ -80,7 +80,7 @@ class Peach_Config implements Countable, Iterator
         $this->_data = array();
         foreach ($array as $key => $value) {
             if (is_array($value)) {
-                $this->_data[$key] = new self($value);
+                $this->_data[$key] = new self($value, $options);
             } else {
                 $this->_data[$key] = $value;
             }
@@ -122,7 +122,7 @@ class Peach_Config implements Countable, Iterator
     /**
      * Support unset() overloading
      *
-     * @param  string $name
+     * @param string $name
      * @throws Peach_Config_Exception
      * @return void
      */
@@ -163,7 +163,7 @@ class Peach_Config implements Countable, Iterator
         }
         
         if (is_array($value)) {
-            $this->_data[$name] = new self($value);
+            $this->_data[$name] = new self($value, $this->_options);
         } else {
             $this->_data[$name] = $value;
         }
@@ -357,17 +357,27 @@ class Peach_Config implements Countable, Iterator
      * @return void
      */
     protected function _assertValidExtend($extendingSection, $extendedSection)
-    {
+    {   
         // detect circular section inheritance
         $extendedSectionCurrent = $extendedSection;
         while (array_key_exists($extendedSectionCurrent, $this->_extends)) {
-            if ($this->_extends[$extendedSectionCurrent] == $extendingSection) {
-                throw new Peach_Config_Exception('Illegal circular inheritance detected');
+            foreach ($this->_extends[$extendedSectionCurrent] as $extendedItem) {
+                if ($extendedItem == $extendingSection) {
+                    throw new Peach_Config_Exception('Illegal circular inheritance detected');
+                }
+                
+                $extendedSectionCurrent = $extendedItem;
             }
-            $extendedSectionCurrent = $this->_extends[$extendedSectionCurrent];
         }
+        
         // remember that this section extends another section
-        $this->_extends[$extendingSection] = $extendedSection;
+        if (!isset($this->_extends[$extendingSection])) {
+            $this->_extends[$extendingSection] = array($extendedSection);
+        } else {
+            if (!in_array($extendedSection, $this->_extends[$extendingSection])) {
+                $this->_extends[$extendingSection][] = $extendedSection;
+            }
+        }
     }
     
     /**
@@ -385,11 +395,7 @@ class Peach_Config implements Countable, Iterator
                 if (isset($firstArray[$key])) {
                     $firstArray[$key] = $this->_arrayMergeRecursive($firstArray[$key], $value);
                 } else {
-                    if($key === 0) {
-                        $firstArray= array(0=>$this->_arrayMergeRecursive($firstArray, $value));
-                    } else {
-                        $firstArray[$key] = $value;
-                    }
+                    $firstArray[$key] = $value;
                 }
             }
         } else {

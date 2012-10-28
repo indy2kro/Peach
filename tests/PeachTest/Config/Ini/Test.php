@@ -26,14 +26,6 @@ class PeachTest_Config_Ini_Test extends PHPUnit_Framework_TestCase
         new Peach_Config_Ini($invalidFile);
     }
     
-    public function testInvalidMultipleExtends()
-    {
-        $invalidFile = dirname(__FILE__) . '/_files/multiple.ini';
-        
-        $this->setExpectedException('Peach_Config_Exception');
-        new Peach_Config_Ini($invalidFile);
-    }
-    
     public function testInvalidNonExistentExtend()
     {
         $invalidFile = dirname(__FILE__) . '/_files/nonexistent.ini';
@@ -97,6 +89,28 @@ class PeachTest_Config_Ini_Test extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Peach_Config', $config->nested2);
         $this->assertEquals($config->nested1->key31, 'value31');
         $this->assertEquals($config->nested1->key11, 'value11');
+    }
+    
+    public function testMultipleExtends()
+    {
+        $validFile = dirname(__FILE__) . '/_files/multiple.ini';
+        
+        $config = new Peach_Config_Ini($validFile);
+        
+        $this->assertEquals($config->nested1->key31, 'value31');
+        $this->assertEquals($config->nested1->key11, 'value21');
+        $this->assertEquals($config->nested1->key22, 'value22');
+    }
+    
+    public function testMultipleExtendsSection()
+    {
+        $validFile = dirname(__FILE__) . '/_files/multiple.ini';
+        
+        $config = new Peach_Config_Ini($validFile, 'nested1');
+        
+        $this->assertEquals($config->key31, 'value31');
+        $this->assertEquals($config->key11, 'value21');
+        $this->assertEquals($config->key22, 'value22');
     }
     
     public function testCircularExtend()
