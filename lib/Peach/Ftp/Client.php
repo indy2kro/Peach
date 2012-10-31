@@ -27,7 +27,7 @@ class Peach_Ftp_Client
     const OPT_TMP_FILE_EXTENSION = 'tmp_file_extension';
     const OPT_OVERWRITE = 'overwrite';
     const OPT_REMOVE_UPLOADED = 'remove_uploaded';
-    const OPT_LOG_METHOD = 'log_method';
+    const OPT_LOG = 'logger';
     const OPT_RESUME = 'resume';
     const OPT_RETRY_ENABLE = 'retry_enable';
     const OPT_RETRY_COUNT = 'retry_count';
@@ -51,7 +51,7 @@ class Peach_Ftp_Client
         self::OPT_TMP_FILE_EXTENSION => '.tmp',
         self::OPT_OVERWRITE => false,
         self::OPT_REMOVE_UPLOADED => false,
-        self::OPT_LOG_METHOD => null,
+        self::OPT_LOG => null,
         self::OPT_RESUME => false,
         self::OPT_RETRY_ENABLE => false,
         self::OPT_RETRY_COUNT => 3,
@@ -137,12 +137,12 @@ class Peach_Ftp_Client
             $currentTry++;
             
             try {
-                $this->_log('Try to connect to FTP server', __FILE__, __LINE__);
+                $this->_log('Try to connect to FTP server', Peach_Log::DEBUG);
                 $this->_connect();
                 $connected = true;
             } catch (Peach_Ftp_Client_Exception $ex) {
                 if ($this->_options[self::OPT_RETRY_ENABLE] && ($currentTry <= $this->_options[self::OPT_RETRY_COUNT])) {
-                    $this->_log('Failed to connect to FTP server, sleep before retry', __FILE__, __LINE__);
+                    $this->_log('Failed to connect to FTP server, sleep before retry', Peach_Log::NOTICE);
                     sleep($this->_options[self::OPT_RETRY_SLEEP]);
                 }
             }
@@ -158,7 +158,7 @@ class Peach_Ftp_Client
             $this->setPasv($this->_options[self::OPT_PASV]);
         }
 
-        $this->_log('Connected to FTP server ' . $this->_options[self::OPT_HOST] . ':' . $this->_options[self::OPT_PORT], __FILE__, __LINE__);
+        $this->_log('Connected to FTP server ' . $this->_options[self::OPT_HOST] . ':' . $this->_options[self::OPT_PORT], Peach_Log::INFO);
     }
     
     /**
@@ -200,7 +200,7 @@ class Peach_Ftp_Client
         $result = @ftp_set_option($this->_connection, $optionName, $optionValue);
         
         if (false === $result) {
-            $this->_log('Failed to set option ' . $optionName . ' to value ' . $optionValue, __FILE__, __LINE__);
+            $this->_log('Failed to set option ' . $optionName . ' to value ' . $optionValue, Peach_Log::NOTICE);
         }
         
         return $result;
@@ -222,7 +222,7 @@ class Peach_Ftp_Client
         $result = @ftp_get_option($this->_connection, $optionName);
         
         if (false === $result) {
-            $this->_log('Failed to get option ' . $optionName, __FILE__, __LINE__);
+            $this->_log('Failed to get option ' . $optionName, Peach_Log::NOTICE);
         }
         
         return $result;
@@ -261,7 +261,7 @@ class Peach_Ftp_Client
 
         $pasvText = $pasv ? 'TRUE' : 'FALSE';
         
-        $this->_log('Set passive mode to ' . $pasvText, __FILE__, __LINE__);
+        $this->_log('Set passive mode to ' . $pasvText, Peach_Log::DEBUG);
         
         $result = @ftp_pasv($this->_connection, $pasv);
         
@@ -286,7 +286,7 @@ class Peach_Ftp_Client
             throw new Peach_Ftp_Client_Exception('Failed to disconnect from FTP server.');
         }
 
-        $this->_log('Closed connection to FTP server', __FILE__, __LINE__);
+        $this->_log('Closed connection to FTP server', Peach_Log::INFO);
 
         $this->_connection = null;
     }
@@ -306,7 +306,7 @@ class Peach_Ftp_Client
         $currentDirectory = @ftp_pwd($this->_connection);
         
         if (false === $currentDirectory) {
-            $this->_log('Failed to get current directory name', __FILE__, __LINE__);
+            $this->_log('Failed to get current directory name', Peach_Log::NOTICE);
         }
         
         return $currentDirectory;
@@ -332,7 +332,7 @@ class Peach_Ftp_Client
         $this->setOptions($contextualOptions);
         
         if (!file_exists($localFile)) {
-            $this->_log('Local file does not exist: ' . $localFile, __FILE__, __LINE__);
+            $this->_log('Local file does not exist: ' . $localFile, Peach_Log::NOTICE);
 
             // reset options
             $this->_options = $existingOptions;
@@ -348,7 +348,7 @@ class Peach_Ftp_Client
         $chdirResult = $this->chdir($remoteDirectory);
 
         if (!$chdirResult) {
-            $this->_log('Failed to change directory to '. $remoteDirectory, __FILE__, __LINE__);
+            $this->_log('Failed to change directory to '. $remoteDirectory, Peach_Log::NOTICE);
             
             // reset options
             $this->_options = $existingOptions;
@@ -360,12 +360,12 @@ class Peach_Ftp_Client
 
         if ($fileExists) {
             if ($this->_options[self::OPT_OVERWRITE]) {
-                $this->_log('File ' . $remoteFile . ' exists, overwriting', __FILE__, __LINE__);
+                $this->_log('File ' . $remoteFile . ' exists, overwriting', Peach_Log::INFO);
 
                 $deleteResult = $this->deleteFile($remoteFile);
 
                 if (!$deleteResult) {
-                    $this->_log('Failed to delete remote file ' . $remoteFile . ', abort copy', __FILE__, __LINE__);
+                    $this->_log('Failed to delete remote file ' . $remoteFile . ', abort copy', Peach_Log::NOTICE);
                     
                     // reset options
                     $this->_options = $existingOptions;
@@ -376,7 +376,7 @@ class Peach_Ftp_Client
                 $remoteSize = $this->getFileSize($remoteFile);
                 
                 if (false === $remoteSize) {
-                    $this->_log('Failed to get file size for remote file: ' . $remoteFile, __FILE__, __LINE__);
+                    $this->_log('Failed to get file size for remote file: ' . $remoteFile, Peach_Log::NOTICE);
                     
                     // reset options
                     $this->_options = $existingOptions;
@@ -385,7 +385,7 @@ class Peach_Ftp_Client
                 
                 // nothing to do, file size matches
                 if ($localSize == $remoteSize) {
-                    $this->_log('Remote file already exists and has the correct size: ' . $remoteFile, __FILE__, __LINE__);
+                    $this->_log('Remote file already exists and has the correct size: ' . $remoteFile, Peach_Log::DEBUG);
                     
                     // reset options
                     $this->_options = $existingOptions;
@@ -393,14 +393,14 @@ class Peach_Ftp_Client
                 }
                 
                 // resume upload
-                $this->_log('Resume upload for file: ' . $remoteFile . ' from offset ' . $remoteSize, __FILE__, __LINE__);
+                $this->_log('Resume upload for file: ' . $remoteFile . ' from offset ' . $remoteSize, Peach_Log::DEBUG);
                 $uploadResult = $this->_uploadFile($localFile, $remoteFile, $remoteSize);
                 
                 // reset options
                 $this->_options = $existingOptions;
                 return $uploadResult;
             } else {
-                $this->_log('Can not upload ' . $localFile . ', destination already exists and overwrite is disabled', __FILE__, __LINE__);
+                $this->_log('Can not upload ' . $localFile . ', destination already exists and overwrite is disabled', Peach_Log::DEBUG);
                 
                 // reset options
                 $this->_options = $existingOptions;
@@ -430,9 +430,9 @@ class Peach_Ftp_Client
                 $renameResult = $this->rename($remoteFileNameFull, $remoteFile);
 
                 if ($renameResult) {
-                    $this->_log('Successfully renamed ' . $remoteFileNameFull . ' to ' . $remoteFile, __FILE__, __LINE__);
+                    $this->_log('Successfully renamed ' . $remoteFileNameFull . ' to ' . $remoteFile, Peach_Log::DEBUG);
                 } else {
-                    $this->_log('Failed to rename ' . $remoteFileNameFull . ' to ' . $remoteFile, __FILE__, __LINE__);
+                    $this->_log('Failed to rename ' . $remoteFileNameFull . ' to ' . $remoteFile, Peach_Log::NOTICE);
                 }
 
                 $uploadResult = $renameResult;
@@ -443,25 +443,25 @@ class Peach_Ftp_Client
         }
 
         if (!$uploadResult) {
-            $this->_log('Failed to upload file: '. $localFile, __FILE__, __LINE__);
+            $this->_log('Failed to upload file: '. $localFile, Peach_Log::NOTICE);
             
             // reset options
             $this->_options = $existingOptions;
             return false;
         } else {
             if ($this->_options[self::OPT_REMOVE_UPLOADED]) {
-                // upload was successfull, remove the local file
+                // upload was successful, remove the local file
                 $unlinkResult = unlink($localFile);
 
                 if ($unlinkResult) {
-                    $this->_log('Removed local file: ' . $localFile . ' after successfull upload', __FILE__, __LINE__);
+                    $this->_log('Removed local file: ' . $localFile . ' after successful upload', Peach_Log::DEBUG);
                 } else {
-                    $this->_log('Failed to remove local file: ' . $localFile . ' after successfull upload', __FILE__, __LINE__);
+                    $this->_log('Failed to remove local file: ' . $localFile . ' after successful upload', Peach_Log::NOTICE);
                 }
             }
         }
 
-        $this->_log('Successfully uploaded file: '. $remoteFile, __FILE__, __LINE__);
+        $this->_log('Successfully uploaded file: '. $remoteFile, Peach_Log::INFO);
         
         // reset options
         $this->_options = $existingOptions;
@@ -489,7 +489,7 @@ class Peach_Ftp_Client
         
         if (file_exists($localFile)) {
             if (!$this->_options[self::OPT_OVERWRITE] && !$this->_options[self::OPT_RESUME]) {
-                $this->_log('Local file already exists and overwrite is disabled: ' . $localFile, __FILE__, __LINE__);
+                $this->_log('Local file already exists and overwrite is disabled: ' . $localFile, Peach_Log::DEBUG);
                     
                 // reset options
                 $this->_options = $existingOptions;
@@ -501,7 +501,7 @@ class Peach_Ftp_Client
                 $remoteSize = $this->getFileSize($remoteFile);
                 
                 if (false === $remoteSize) {
-                    $this->_log('Failed to get file size for remote file: ' . $remoteFile, __FILE__, __LINE__);
+                    $this->_log('Failed to get file size for remote file: ' . $remoteFile, Peach_Log::NOTICE);
                     
                     // reset options
                     $this->_options = $existingOptions;
@@ -510,7 +510,7 @@ class Peach_Ftp_Client
                 
                 // nothing to do, file size matches
                 if ($localSize == $remoteSize) {
-                    $this->_log('Local file already exists and has the correct size: ' . $localFile, __FILE__, __LINE__);
+                    $this->_log('Local file already exists and has the correct size: ' . $localFile, Peach_Log::DEBUG);
                     
                     // reset options
                     $this->_options = $existingOptions;
@@ -518,7 +518,7 @@ class Peach_Ftp_Client
                 }
                 
                 // resume download
-                $this->_log('Resume download for file: ' . $remoteFile . ' from offset ' . $localSize, __FILE__, __LINE__);
+                $this->_log('Resume download for file: ' . $remoteFile . ' from offset ' . $localSize, Peach_Log::DEBUG);
                 $downloadResult = $this->_downloadFile($localFile, $remoteFile, $localSize);
                 
                 // reset options
@@ -539,9 +539,9 @@ class Peach_Ftp_Client
                 $renameResult = rename($localFileFull, $localFile);
 
                 if ($renameResult) {
-                    $this->_log('Successfully renamed ' . $localFileFull . ' to ' . $localFile, __FILE__, __LINE__);
+                    $this->_log('Successfully renamed ' . $localFileFull . ' to ' . $localFile, Peach_Log::DEBUG);
                 } else {
-                    $this->_log('Failed to rename ' . $localFileFull . ' to ' . $localFile, __FILE__, __LINE__);
+                    $this->_log('Failed to rename ' . $localFileFull . ' to ' . $localFile, Peach_Log::NOTICE);
                 }
 
                 $downloadResult = $renameResult;
@@ -552,14 +552,14 @@ class Peach_Ftp_Client
         }
 
         if (!$downloadResult) {
-            $this->_log('Failed to download file: '. $remoteFile, __FILE__, __LINE__);
+            $this->_log('Failed to download file: '. $remoteFile, Peach_Log::NOTICE);
             
             // reset options
             $this->_options = $existingOptions;
             return false;
         }
 
-        $this->_log('Successfully downloaded file: '. $remoteFile, __FILE__, __LINE__);
+        $this->_log('Successfully downloaded file: '. $remoteFile, Peach_Log::INFO);
         
         // reset options
         $this->_options = $existingOptions;
@@ -588,10 +588,10 @@ class Peach_Ftp_Client
         $localDirectory = rtrim($localDirectory, '/') . '/';
         $remoteDirectory = rtrim($remoteDirectory, '/') . '/';
 
-        $this->_log('Download directory: ' . $remoteDirectory, __FILE__, __LINE__);
+        $this->_log('Download directory: ' . $remoteDirectory, Peach_Log::INFO);
 
         if (!$this->directoryExists($remoteDirectory)) {
-            $this->_log('Remote directory does not exist: ' . $remoteDirectory, __FILE__, __LINE__);
+            $this->_log('Remote directory does not exist: ' . $remoteDirectory, Peach_Log::NOTICE);
 
             // reset options
             $this->_options = $existingOptions;
@@ -608,7 +608,7 @@ class Peach_Ftp_Client
             $mkdirResult = mkdir($localPath);
 
             if (!$mkdirResult) {
-                $this->_log('Failed to create local directory: ' . $localPath, __FILE__, __LINE__);
+                $this->_log('Failed to create local directory: ' . $localPath, Peach_Log::NOTICE);
 
                 // reset options
                 $this->_options = $existingOptions;
@@ -690,7 +690,7 @@ class Peach_Ftp_Client
             return true;
         }
 
-        $this->_log('Chdir to ' . $remoteDirectory, __FILE__, __LINE__);
+        $this->_log('Chdir to ' . $remoteDirectory, Peach_Log::DEBUG);
 
         // change remote directory
         $chdirResult = @ftp_chdir($this->_connection, $remoteDirectory);
@@ -698,7 +698,7 @@ class Peach_Ftp_Client
         if ($chdirResult) {
             $this->_remoteDirectory = $remoteDirectory;
         } else {
-            $this->_log('Failed to change directory: ' . $remoteDirectory, __FILE__, __LINE__);
+            $this->_log('Failed to change directory: ' . $remoteDirectory, Peach_Log::NOTICE);
         }
 
         return $chdirResult;
@@ -726,12 +726,12 @@ class Peach_Ftp_Client
         $localDirectory = rtrim($localDirectory, '/') . '/';
         $remoteDirectory = rtrim($remoteDirectory, '/') . '/';
 
-        $this->_log('Upload directory: ' . $localDirectory, __FILE__, __LINE__);
+        $this->_log('Upload directory: ' . $localDirectory, Peach_Log::INFO);
 
         $handle = opendir($localDirectory);
 
         if (!$handle) {
-            $this->_log('Failed to open local directory: ' . $localDirectory, __FILE__, __LINE__);
+            $this->_log('Failed to open local directory: ' . $localDirectory, Peach_Log::NOTICE);
             
             // reset options
             $this->_options = $existingOptions;
@@ -758,13 +758,13 @@ class Peach_Ftp_Client
                 $uploadResult = $this->uploadDirectory($filePath . '/', $remoteDirectory . $fileName . '/');
 
                 if ($uploadResult && $this->_options[self::OPT_REMOVE_UPLOADED]) {
-                    // upload was successfull, remove the local directory
+                    // upload was successful, remove the local directory
                     $rmdirResult = rmdir($filePath);
 
                     if ($rmdirResult) {
-                        $this->_log('Removed local directory: ' . $filePath . ' after successfull upload', __FILE__, __LINE__);
+                        $this->_log('Removed local directory: ' . $filePath . ' after successful upload', Peach_Log::DEBUG);
                     } else {
-                        $this->_log('Failed to remove local directory: ' . $filePath . ' after successfull upload', __FILE__, __LINE__);
+                        $this->_log('Failed to remove local directory: ' . $filePath . ' after successful upload', Peach_Log::NOTICE);
                     }
                 }
             } else {
@@ -775,13 +775,13 @@ class Peach_Ftp_Client
         closedir($handle);
 
         if ($this->_options[self::OPT_REMOVE_UPLOADED]) {
-            // upload was successfull, remove the local directory
+            // upload was successful, remove the local directory
             $rmdirResult = rmdir($localDirectory);
 
             if ($rmdirResult) {
-                $this->_log('Removed local directory: ' . $localDirectory . ' after successfull upload', __FILE__, __LINE__);
+                $this->_log('Removed local directory: ' . $localDirectory . ' after successful upload', Peach_Log::DEBUG);
             } else {
-                $this->_log('Failed to remove local directory: ' . $localDirectory . ' after successfull upload', __FILE__, __LINE__);
+                $this->_log('Failed to remove local directory: ' . $localDirectory . ' after successful upload', Peach_Log::NOTICE);
             }
         }
 
@@ -803,7 +803,7 @@ class Peach_Ftp_Client
             throw new Peach_Ftp_Client_Exception('Not connected to FTP server.');
         }
 
-        $this->_log('Check if file exists: ' . $remoteFileName, __FILE__, __LINE__);
+        $this->_log('Check if file exists: ' . $remoteFileName, Peach_Log::DEBUG);
 
         $sizeResult = $this->getFileSize($remoteFileName);
 
@@ -863,7 +863,7 @@ class Peach_Ftp_Client
             throw new Peach_Ftp_Client_Exception('Not connected to FTP server.');
         }
 
-        $this->_log('Check if directory exists: ' . $remoteDirectory, __FILE__, __LINE__);
+        $this->_log('Check if directory exists: ' . $remoteDirectory, Peach_Log::DEBUG);
 
         if (!@ftp_chdir($this->_connection, $remoteDirectory)) {
             return false;
@@ -887,12 +887,12 @@ class Peach_Ftp_Client
             throw new Peach_Ftp_Client_Exception('Not connected to FTP server.');
         }
 
-        $this->_log('Delete remote file: ' . $remoteFile, __FILE__, __LINE__);
+        $this->_log('Delete remote file: ' . $remoteFile, Peach_Log::DEBUG);
 
         $deleteResult = @ftp_delete($this->_connection, $remoteFile);
 
         if (!$deleteResult) {
-             $this->_log('Failed to delete remote file: '. $remoteFile, __FILE__, __LINE__);
+             $this->_log('Failed to delete remote file: '. $remoteFile, Peach_Log::NOTICE);
         }
 
         return $deleteResult;
@@ -914,12 +914,12 @@ class Peach_Ftp_Client
             return false;
         }
 
-        $this->_log('Delete remote directory: ' . $remoteDirectory, __FILE__, __LINE__);
+        $this->_log('Delete remote directory: ' . $remoteDirectory, Peach_Log::DEBUG);
 
         $deleteResult = @ftp_rmdir($this->_connection, $remoteDirectory);
 
         if (!$deleteResult) {
-             $this->_log('Failed to delete remote directory: '. $remoteDirectory, __FILE__, __LINE__);
+             $this->_log('Failed to delete remote directory: '. $remoteDirectory, Peach_Log::NOTICE);
         }
 
         return $deleteResult;
@@ -938,13 +938,13 @@ class Peach_Ftp_Client
             throw new Peach_Ftp_Client_Exception('Not connected to FTP server.');
         }
 
-        $this->_log('Delete remote path: ' . $remotePath, __FILE__, __LINE__);
+        $this->_log('Delete remote path: ' . $remotePath, Peach_Log::DEBUG);
 
         if ($this->directoryExists($remotePath)) {
             $filesList = $this->getFilesList($remotePath);
             
             if (false === $filesList) {
-                $this->_log('Failed to delete remote path: ' . $remotePath, __FILE__, __LINE__);
+                $this->_log('Failed to delete remote path: ' . $remotePath, Peach_Log::NOTICE);
                 return false;
             }
             
@@ -970,7 +970,7 @@ class Peach_Ftp_Client
             return $deleteResult;
         }
         
-        $this->_log('Remote path does not exist: ' . $remotePath, __FILE__, __LINE__);
+        $this->_log('Remote path does not exist: ' . $remotePath, Peach_Log::NOTICE);
 
         return false;
     }
@@ -989,12 +989,12 @@ class Peach_Ftp_Client
             throw new Peach_Ftp_Client_Exception('Not connected to FTP server.');
         }
 
-        $this->_log('Rename remote file: ' . $source . ' to ' . $destination, __FILE__, __LINE__);
+        $this->_log('Rename remote file: ' . $source . ' to ' . $destination, Peach_Log::DEBUG);
 
         $renameResult = @ftp_rename($this->_connection, $source, $destination);
 
         if (!$renameResult) {
-             $this->_log('Failed to rename remote file: ' . $source . ' to ' . $destination, __FILE__, __LINE__);
+             $this->_log('Failed to rename remote file: ' . $source . ' to ' . $destination, Peach_Log::NOTICE);
         }
 
         return $renameResult;
@@ -1023,12 +1023,12 @@ class Peach_Ftp_Client
             return true;
         }
         
-        $this->_log('Create remote directory: ' . $remoteDirectory, __FILE__, __LINE__);
+        $this->_log('Create remote directory: ' . $remoteDirectory, Peach_Log::DEBUG);
 
         $mkdirResult = @ftp_mkdir($this->_connection, $remoteDirectory);
 
         if (!$mkdirResult) {
-            $this->_log('Failed to create remote directory: ' . $remoteDirectory, __FILE__, __LINE__);
+            $this->_log('Failed to create remote directory: ' . $remoteDirectory, Peach_Log::NOTICE);
         }
 
         return $mkdirResult;
@@ -1086,7 +1086,7 @@ class Peach_Ftp_Client
         $files = @ftp_nlist($this->_connection, $remoteDirectory);
         
         if (false === $files) {
-            $this->_log('Failed to get files list: ' . $remoteDirectory, __FILE__, __LINE__);
+            $this->_log('Failed to get files list: ' . $remoteDirectory, Peach_Log::NOTICE);
         }
         
         return $files;
@@ -1108,7 +1108,7 @@ class Peach_Ftp_Client
         $rawList = @ftp_rawlist($this->_connection, $remoteDirectory);
         
         if (false === $rawList) {
-            $this->_log('Failed to get files list: ' . $remoteDirectory, __FILE__, __LINE__);
+            $this->_log('Failed to get files list: ' . $remoteDirectory, Peach_Log::NOTICE);
         }
 
         // format raw files list
@@ -1132,7 +1132,7 @@ class Peach_Ftp_Client
         $sysType = @ftp_systype($this->_connection);
         
         if (false === $sysType) {
-            $this->_log('Failed to retrieve system type', __FILE__, __LINE__);
+            $this->_log('Failed to retrieve system type', Peach_Log::NOTICE);
         }
         
         return $sysType;
@@ -1152,12 +1152,12 @@ class Peach_Ftp_Client
             throw new Peach_Ftp_Client_Exception('Not connected to FTP server.');
         }
         
-        $this->_log('Chmod ' . sprintf('%o', $mode) . ' path: ' . $path, __FILE__, __LINE__);
+        $this->_log('Chmod ' . sprintf('%o', $mode) . ' path: ' . $path, Peach_Log::DEBUG);
 
         $result = @ftp_chmod($this->_connection, $mode, $path);
         
         if (false === $result) {
-            $this->_log('Failed to chmod path: ' . $path, __FILE__, __LINE__);
+            $this->_log('Failed to chmod path: ' . $path, Peach_Log::NOTICE);
             return false;
         }
         
@@ -1231,7 +1231,7 @@ class Peach_Ftp_Client
      */
     protected function _uploadFile($localFile, $remoteFile, $startPosition = 0)
     {
-        $this->_log('Starting file upload: ' . $remoteFile, __FILE__, __LINE__);
+        $this->_log('Starting file upload: ' . $remoteFile, Peach_Log::DEBUG);
 
         // start the upload
         $putResult = @ftp_put($this->_connection, $remoteFile, $localFile, $this->_options[self::OPT_MODE], $startPosition);
@@ -1249,7 +1249,7 @@ class Peach_Ftp_Client
      */
     protected function _downloadFile($localFile, $remoteFile, $startPosition = 0)
     {
-        $this->_log('Starting file download: ' . $remoteFile, __FILE__, __LINE__);
+        $this->_log('Starting file download: ' . $remoteFile, Peach_Log::DEBUG);
 
         // start the upload
         $getResult = @ftp_get($this->_connection, $localFile, $remoteFile, $this->_options[self::OPT_MODE], $startPosition);
@@ -1346,28 +1346,22 @@ class Peach_Ftp_Client
     /**
      * Log message
      * 
-     * @param string  $message Message to log
-     * @param string  $file    File name
-     * @param integer $line    File line
+     * @param string  $message  Message to log
+     * @param integer $priority Log priority
      * @return void
      */
-    protected function _log($message, $file, $line)
+    protected function _log($message, $priority)
     {
-        if (is_null($this->_options[self::OPT_LOG_METHOD])) {
+        if (is_null($this->_options[self::OPT_LOG])) {
             return null;
         }
         
-        // make sure the option is callable
-        if (!is_callable($this->_options[self::OPT_LOG_METHOD])) {
-            throw new Peach_Ftp_Client_Exception('Logging method option must be a valid callback.');
+        // make sure the option is a valid log object
+        if ($this->_options[self::OPT_LOG] instanceof Peach_Log) {
+            throw new Peach_Ftp_Client_Exception('Log object must be an instance of Peach_Log.');
         }
         
-        $params = array(
-            $message, $file, $line
-        );
-        
-        // call log method
-        call_user_func_array($this->_options[self::OPT_LOG_METHOD], $params);
+        $this->_options[self::OPT_LOG]->log($message, $priority);
     }
 }
 
