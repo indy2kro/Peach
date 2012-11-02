@@ -78,8 +78,8 @@ class Peach_Http_Uri
     {
         $parts = parse_url($uri);
         
-        if (is_null($parts)) {
-            throw new Peach_Http_Uri_Exception('Provided uri is invalid');
+        if (is_null($parts) || empty($parts)) {
+            throw new Peach_Http_Uri_Exception('Internal error: scheme-specific decomposition failed');
         }
         
         if (isset($parts['scheme'])) {
@@ -88,7 +88,7 @@ class Peach_Http_Uri
             throw new Peach_Http_Uri_Exception('Internal error: scheme-specific decomposition failed');
         }
         
-        if (!in_array($this->_options[self::OPT_SCHEME])) {
+        if (!in_array($this->_options[self::OPT_SCHEME], $this->_allowedSchemes)) {
             throw new Peach_Http_Uri_Exception("Invalid scheme provided: '" . $this->_options[self::OPT_SCHEME] . "'");
         }
         
