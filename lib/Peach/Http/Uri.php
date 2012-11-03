@@ -17,34 +17,33 @@ class Peach_Http_Uri
      */
     const SCHEME_HTTP = 'http';
     const SCHEME_HTTPS = 'https';
-    const SCHEME_FTP = 'ftp';
     
     /*
-     * Available options
+     * Available part items
      */
-    const OPT_SCHEME = 'scheme';
-    const OPT_HOST = 'host';
-    const OPT_PORT = 'port';
-    const OPT_PATH = 'path';
-    const OPT_QUERY = 'query';
-    const OPT_FRAGMENT = 'fragment';
-    const OPT_AUTH_USERNAME = 'auth_username';
-    const OPT_AUTH_PASSWORD = 'auth_password';
+    const PART_SCHEME = 'scheme';
+    const PART_HOST = 'host';
+    const PART_PORT = 'port';
+    const PART_PATH = 'path';
+    const PART_QUERY = 'query';
+    const PART_FRAGMENT = 'fragment';
+    const PART_AUTH_USERNAME = 'auth_username';
+    const PART_AUTH_PASSWORD = 'auth_password';
     
     /**
-     * Options
+     * Uri parts
      * 
      * @var array
      */
-    protected $_options = array(
-        self::OPT_SCHEME => self::SCHEME_HTTP,
-        self::OPT_HOST => null,
-        self::OPT_PORT => null,
-        self::OPT_PATH => null,
-        self::OPT_QUERY => null,
-        self::OPT_FRAGMENT => null,
-        self::OPT_AUTH_USERNAME => null,
-        self::OPT_AUTH_PASSWORD => null
+    protected $_parts = array(
+        self::PART_SCHEME => self::SCHEME_HTTP,
+        self::PART_HOST => null,
+        self::PART_PORT => null,
+        self::PART_PATH => null,
+        self::PART_QUERY => null,
+        self::PART_FRAGMENT => null,
+        self::PART_AUTH_USERNAME => null,
+        self::PART_AUTH_PASSWORD => null
     );
     
     /**
@@ -53,7 +52,7 @@ class Peach_Http_Uri
      * @var array
      */
     protected $_allowedSchemes = array(
-        self::SCHEME_HTTP, self::SCHEME_HTTPS, self::SCHEME_FTP
+        self::SCHEME_HTTP, self::SCHEME_HTTPS
     );
     
     /**
@@ -65,6 +64,32 @@ class Peach_Http_Uri
     public function __construct($uri = null)
     {
         $this->_parseString($uri);
+    }
+    
+    /**
+     * Get uri parts
+     * 
+     * @return array
+     */
+    public function getParts()
+    {
+        return $this->_parts;
+    }
+    
+    /**
+     * Get uri part
+     * 
+     * @param string $part
+     * @return array
+     * @throws Peach_Http_Uri_Exception
+     */
+    public function getPart($part)
+    {
+        if (!isset($this->_parts[$part])) {
+            throw new Peach_Http_Uri_Exception('Invalid part provided');
+        }
+        
+        return $this->_parts[$part];
     }
     
     /**
@@ -83,41 +108,41 @@ class Peach_Http_Uri
         }
         
         if (isset($parts['scheme'])) {
-            $this->_options[self::OPT_SCHEME] = $parts['scheme'];
+            $this->_parts[self::PART_SCHEME] = $parts['scheme'];
         } else {
             throw new Peach_Http_Uri_Exception('Internal error: scheme-specific decomposition failed');
         }
         
-        if (!in_array($this->_options[self::OPT_SCHEME], $this->_allowedSchemes)) {
-            throw new Peach_Http_Uri_Exception("Invalid scheme provided: '" . $this->_options[self::OPT_SCHEME] . "'");
+        if (!in_array($this->_parts[self::PART_SCHEME], $this->_allowedSchemes)) {
+            throw new Peach_Http_Uri_Exception("Invalid scheme provided: '" . $this->_parts[self::PART_SCHEME] . "'");
         }
         
         if (isset($parts['host'])) {
-            $this->_options[self::OPT_HOST] = $parts['host'];
+            $this->_parts[self::PART_HOST] = $parts['host'];
         }
         
         if (isset($parts['port'])) {
-            $this->_options[self::OPT_PORT] = $parts['port'];
+            $this->_parts[self::PART_PORT] = $parts['port'];
         }
         
         if (isset($parts['user'])) {
-            $this->_options[self::OPT_AUTH_USERNAME] = $parts['user'];
+            $this->_parts[self::PART_AUTH_USERNAME] = $parts['user'];
         }
         
         if (isset($parts['pass'])) {
-            $this->_options[self::OPT_AUTH_PASSWORD] = $parts['pass'];
+            $this->_parts[self::PART_AUTH_PASSWORD] = $parts['pass'];
         }
         
         if (isset($parts['path'])) {
-            $this->_options[self::OPT_PATH] = $parts['path'];
+            $this->_parts[self::PART_PATH] = $parts['path'];
         }
         
         if (isset($parts['query'])) {
-            $this->_options[self::OPT_QUERY] = $parts['query'];
+            $this->_parts[self::PART_QUERY] = $parts['query'];
         }
         
         if (isset($parts['fragment'])) {
-            $this->_options[self::OPT_FRAGMENT] = $parts['fragment'];
+            $this->_parts[self::PART_FRAGMENT] = $parts['fragment'];
         }
     }
 }
