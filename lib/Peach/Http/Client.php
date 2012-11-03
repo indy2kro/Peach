@@ -61,28 +61,14 @@ class Peach_Http_Client
     /**
      * Adapter
      * 
-     * @var Peach_Http_Adapter_Abstract
+     * @var Peach_Http_Client_Adapter_Abstract
      */
     protected $_adapter;
     
     /**
-     * Last raw request
-     * 
-     * @var string
-     */
-    protected $_lastRawRequest;
-    
-    /**
-     * Last raw response
-     * 
-     * @var string
-     */
-    protected $_lastRawResponse;
-    
-    /**
      * Constructor
      *
-     * @param Peach_Http_Uri|string uri
+     * @param Peach_Http_Uri|string $uri
      * @param array|Peach_Config    $options
      * @return void
      */
@@ -182,26 +168,6 @@ class Peach_Http_Client
     }
 
     /**
-     * Get the last request (as a string)
-     *
-     * @return string
-     */
-    public function getLastRawRequest()
-    {
-        return $this->_lastRawRequest;
-    }
-
-    /**
-     * Get the last response (as a string)
-     *
-     * @return string
-     */
-    public function getLastRawResponse()
-    {
-        return $this->_lastRawResponse;
-    }
-
-    /**
      * Set GET parameter
      *
      * @param string $name
@@ -209,7 +175,7 @@ class Peach_Http_Client
      */
     public function setQueryParameter($name, $value = null)
     {
-        $this->_request->setQueryParameter($name, $value);
+        $this->getRequest()->setQueryParameter($name, $value);
     }
 
     /**
@@ -220,25 +186,25 @@ class Peach_Http_Client
      */
     public function setPostParameter($name, $value = null)
     {
-        $this->_request->setPostParameter($name, $value);
+        $this->getRequest()->setPostParameter($name, $value);
     }
     
     /**
      * Set adapter
      * 
-     * @param Peach_Http_Adapter_Abstract|string $adapter
+     * @param Peach_Http_Client_Adapter_Abstract|string $adapter
      * @return void
      * @throws Peach_Http_Client_Exception
      */
     public function setAdapter($adapter)
     {
-        if ($adapter instanceof Peach_Http_Adapter_Abstract) {
+        if ($adapter instanceof Peach_Http_Client_Adapter_Abstract) {
             $this->_adapter = $adapter;
         } else {
             $this->_adapter = new $adapter();
             
-            if (!$this->_adapter instanceof Peach_Http_Adapter_Abstract) {
-                throw new Peach_Http_Client_Exception('Adapter must be an instance of Peach_Http_Adapter_Abstract');
+            if (!$this->_adapter instanceof Peach_Http_Client_Adapter_Abstract) {
+                throw new Peach_Http_Client_Exception('Adapter must be an instance of Peach_Http_Client_Adapter_Abstract');
             }
         }
     }
@@ -246,7 +212,7 @@ class Peach_Http_Client
     /**
      * Get adapter
      * 
-     * @return Peach_Http_Adapter_Abstract
+     * @return Peach_Http_Client_Adapter_Abstract
      */
     public function getAdapter()
     {

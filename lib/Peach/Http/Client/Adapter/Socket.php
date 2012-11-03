@@ -8,9 +8,9 @@
  */
 
 /**
- * HTTP client abstract adapter
+ * HTTP client socket adapter
  */
-abstract class Peach_Http_Adapter_Abstract
+class Peach_Http_Client_Adapter_Socket extends Peach_Http_Client_Adapter_Abstract
 {
     // TODO
 }
