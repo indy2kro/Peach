@@ -63,7 +63,9 @@ class Peach_Http_Uri
      */
     public function __construct($uri = null)
     {
-        $this->_parseString($uri);
+        if (!is_null($uri)) {
+            $this->_parseString($uri);
+        }
     }
     
     /**
@@ -110,7 +112,8 @@ class Peach_Http_Uri
         if (isset($parts['scheme'])) {
             $this->_parts[self::PART_SCHEME] = $parts['scheme'];
         } else {
-            throw new Peach_Http_Uri_Exception('Internal error: scheme-specific decomposition failed');
+            // scheme not provided, use HTTP as fallback
+            $this->_parts[self::PART_SCHEME] = self::SCHEME_HTTP;
         }
         
         if (!in_array($this->_parts[self::PART_SCHEME], $this->_allowedSchemes)) {

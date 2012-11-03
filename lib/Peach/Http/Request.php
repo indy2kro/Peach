@@ -64,10 +64,33 @@ class Peach_Http_Request
     
     /**
      * Constructor
+     *
+     * @param Peach_Http_Uri|string uri
+     * @param array|Peach_Config    $options
+     * @return void
      */
-    public function __construct()
+    public function __construct($uri = null, $options = array())
     {
-        // TODO
+        if (!is_null($uri)) {
+            $this->setUri($uri);
+        }
+        
+        $this->setOptions($options);
+    }
+    
+    /**
+     * Set options
+     *
+     * @param array|Peach_Config $options
+     * @return void
+     */
+    public function setOptions($options = array())
+    {
+        if ($options instanceof Peach_Config) {
+            $options = $options->toArray();
+        }
+        
+        $this->_options = array_merge($this->_options, $options);
     }
     
     /**
@@ -78,6 +101,72 @@ class Peach_Http_Request
     public function getMethod()
     {
         return $this->_options[self::OPT_METHOD];
+    }
+
+    /**
+     * Set method
+     * 
+     * @param string $method
+     * @return string
+     * @throws Peach_Http_Request_Exception
+     */
+    public function setMethod($method)
+    {
+        if (!in_array($method, $this->_availableMethods)) {
+            throw new Peach_Http_Request_Exception("Invalid method provided: '" . $method . "'");
+        }
+        
+        $this->_options[self::OPT_METHOD] = $method;
+    }
+    
+    /**
+     * Get query parameter
+     * 
+     * @param string $name
+     * @return mixed
+     */
+    public function getQueryParameter($name)
+    {
+        if (!isset($this->_options[self::OPT_QUERY_PARAMS][$name])) {
+            return null;
+        }
+        
+        return $this->_options[self::OPT_QUERY_PARAMS][$name];
+    }
+
+    /**
+     * Get query parameters
+     * 
+     * @return array
+     */
+    public function getQueryParameters()
+    {
+        return $this->_options[self::OPT_QUERY_PARAMS];
+    }
+
+    /**
+     * Get post parameter
+     * 
+     * @param string $name
+     * @return mixed
+     */
+    public function getPostParameter($name)
+    {
+        if (!isset($this->_options[self::OPT_POST_PARAMS][$name])) {
+            return null;
+        }
+        
+        return $this->_options[self::OPT_POST_PARAMS][$name];
+    }
+
+    /**
+     * Get post parameters
+     * 
+     * @return array
+     */
+    public function getPostParameters()
+    {
+        return $this->_options[self::OPT_POST_PARAMS];
     }
 
     /**
@@ -122,6 +211,20 @@ class Peach_Http_Request
         }
         
         $this->_options[self::OPT_URI] = $uri;
+    }
+    
+    /**
+     * Get uri
+     * 
+     * @return Peach_Http_Uri
+     */
+    public function getUri()
+    {
+        if (is_null($this->_options[self::OPT_URI])) {
+            $this->_options[self::OPT_URI] = new Peach_Http_Uri();
+        }
+        
+        return $this->_options[self::OPT_URI];
     }
 }
 

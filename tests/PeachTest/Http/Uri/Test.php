@@ -69,8 +69,17 @@ class PeachTest_Http_Uri_Test extends PHPUnit_Framework_TestCase
     
     public function testEmpty()
     {
-        $this->setExpectedException('Peach_Http_Uri_Exception');
-        new Peach_Http_Uri();
+        $uri = new Peach_Http_Uri();
+        $this->assertInstanceOf('Peach_Http_Uri', $uri);
+    }
+    
+    public function testNoScheme()
+    {
+        $uri = new Peach_Http_Uri('generic.com');
+        $this->assertInstanceOf('Peach_Http_Uri', $uri);
+        
+        $scheme = $uri->getPart(Peach_Http_Uri::PART_SCHEME);
+        $this->assertEquals(Peach_Http_Uri::SCHEME_HTTP, $scheme);
     }
     
     public function testInvalidUri()
@@ -105,7 +114,6 @@ class PeachTest_Http_Uri_Test extends PHPUnit_Framework_TestCase
             }
         }
     }
-    
 }
 
 /* EOF */
