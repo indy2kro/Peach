@@ -105,6 +105,17 @@ class PeachTest_Http_Request_Test extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Peach_Http_Uri', $uriObj);
         $this->assertEquals('www.example.com', $uriObj->getPart(Peach_Http_Uri::PART_HOST));
     }
+    
+    public function testRawRequest()
+    {
+        $rawRequest = '';
+        
+        $request = new Peach_Http_Request();
+        $request->setRawRequest($rawRequest);
+        
+        $this->assertEquals($rawRequest, $request->getRawRequest());
+    }
+    
 }
 
 /* EOF */

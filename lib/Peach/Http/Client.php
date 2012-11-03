@@ -19,6 +19,14 @@ class Peach_Http_Client
     const HTTP_VERSION_11 = '1.1';
     
     /*
+     * Available headers (only the headers used by the client are listed)
+     */
+    const HEADER_HOST = 'Host';
+    const HEADER_LOCATION = 'Location';
+    const HEADER_CONTENT_TYPE = 'Content-Type';
+    const HEADER_CONTENT_LENGTH = 'Content-Length';
+    
+    /*
      * Available options
      */
     const OPT_ADAPTER_TYPE = 'adapter_type';
@@ -235,65 +243,66 @@ class Peach_Http_Client
         if (!is_null($request)) {
             $this->setRequest($request);
         }
+        
+        // get request object
+        $request = $this->getRequest();
 
         // get adapter
-        $adapter = $this->getAdapter();
+        $this->_adapter = $this->getAdapter();
         
         $redirectCounter = 0;
         
+        // uri
+        $uri = clone $this->getUri();
+        
         do {
-            // uri
-            $uri = $this->getUri();
-
-            // method
-            $method = $this->getRequest()->getMethod();
-
-            // body
-            $body = $this->_prepareBody();
-
-            // headers
-            $headers = $this->_prepareHeaders();
-            
-            $response = $this->_doRequest($uri, $method, $body, $headers);
+            $response = $this->_doRequest($uri, $request);
 
             if (!$response->isRedirect()) {
                 break;
             }
             
-            // TODO
+            $uri->setUri($response->getHeader(self::HEADER_LOCATION));
+            $request->setUri($uri);
             
             $redirectCounter++;
         } while ($redirectCounter < $this->_options[self::OPT_MAX_REDIRECTS]);
-    }
-    
-    /**
-     * Prepare body
-     */
-    protected function _prepareBody()
-    {
-        // TODO
-    }
-    
-    /**
-     * Prepare headers
-     */
-    protected function _prepareHeaders()
-    {
-        // TODO
+        
+        return $response;
     }
     
     /**
      * Do request
      * 
-     * @param Peach_Http_Uri $uri
-     * @param string         $method
-     * @param string         $body
-     * @param array          $headers
+     * @param Peach_Http_Uri     $uri
+     * @param Peach_Http_Request $request
      * @return Peach_Http_Response
      */
-    protected function _doRequest(Peach_Http_Uri $uri, $method, $body, Array $headers = array())
+    protected function _doRequest(Peach_Http_Uri $uri, Peach_Http_Request $request)
     {
-        // TODO
+        $host = $uri->getPart(Peach_Http_Uri::PART_HOST);
+        $port = $uri->getPart(Peach_Http_Uri::PART_PORT);
+        $secure = ($uri->getPart(Peach_Http_Uri::PART_SCHEME) == Peach_Http_Uri::SCHEME_HTTPS) ? true : false;
+        
+        // connect to the remote host
+        $this->_adapter->connect($host, $port, $secure);
+        
+        $method = $request->getMethod();
+        $headers = array(); // TODO
+        $body = ''; // TODO
+        
+        // write request
+        $rawRequest = $this->_adapter->write($method, $uri, $headers, $body);
+        $request->setRawRequest($rawRequest);
+        
+        // read response
+        $rawResponse = $this->_adapter->read();
+        
+        // build response object
+        $response = new Peach_Http_Response();
+        $response->setRawResponse($rawResponse);
+        
+        return $response;
     }
 }
 

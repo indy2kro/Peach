@@ -114,6 +114,15 @@ class PeachTest_Http_Client_Test extends PHPUnit_Framework_TestCase
         $this->setExpectedException('Peach_Http_Client_Exception');
         $client->setAdapter($adapter);
     }
+    
+    public function testRequest()
+    {
+        $uri = 'http://www.cl.cam.ac.uk/~mgk25/ucs/examples/UTF-8-test.txt';
+        
+        $client = new Peach_Http_Client($uri);
+        $client->send();
+        
+    }
 }
 
 /* EOF */

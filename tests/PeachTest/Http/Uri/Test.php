@@ -75,11 +75,8 @@ class PeachTest_Http_Uri_Test extends PHPUnit_Framework_TestCase
     
     public function testNoScheme()
     {
+        $this->setExpectedException('Peach_Http_Uri_Exception');
         $uri = new Peach_Http_Uri('generic.com');
-        $this->assertInstanceOf('Peach_Http_Uri', $uri);
-        
-        $scheme = $uri->getPart(Peach_Http_Uri::PART_SCHEME);
-        $this->assertEquals(Peach_Http_Uri::SCHEME_HTTP, $scheme);
     }
     
     public function testInvalidUri()
@@ -113,6 +110,51 @@ class PeachTest_Http_Uri_Test extends PHPUnit_Framework_TestCase
                 $this->fail('Memory leak detected!');
             }
         }
+    }
+    
+    public function testSetParts()
+    {
+        $scheme = 'http';
+        $host = 'host';
+        $port = 80;
+        
+        $parts = array(
+            Peach_Http_Uri::PART_SCHEME => $scheme,
+            Peach_Http_Uri::PART_HOST => $host,
+            Peach_Http_Uri::PART_PORT => $port
+        );
+        
+        $uriObj = new Peach_Http_Uri();
+        $uriObj->setParts($parts);
+                
+        $this->assertEquals($scheme, $uriObj->getPart(Peach_Http_Uri::PART_SCHEME));
+        $this->assertEquals($host, $uriObj->getPart(Peach_Http_Uri::PART_HOST));
+        $this->assertEquals($port, $uriObj->getPart(Peach_Http_Uri::PART_PORT));
+    }
+    
+    public function testSetPart()
+    {
+        $scheme = 'http';
+        $host = 'host';
+        $port = 80;
+        
+        $uriObj = new Peach_Http_Uri();
+        $uriObj->setPart(Peach_Http_Uri::PART_SCHEME, $scheme);
+        $uriObj->setPart(Peach_Http_Uri::PART_HOST, $host);
+        $uriObj->setPart(Peach_Http_Uri::PART_PORT, $port);
+                
+        $this->assertEquals($scheme, $uriObj->getPart(Peach_Http_Uri::PART_SCHEME));
+        $this->assertEquals($host, $uriObj->getPart(Peach_Http_Uri::PART_HOST));
+        $this->assertEquals($port, $uriObj->getPart(Peach_Http_Uri::PART_PORT));
+    }
+    
+    public function testToString()
+    {
+        $uri = 'http://username:password@hostname/path?arg=value#anchor';
+        
+        $uriObj = new Peach_Http_Uri($uri);
+        
+        $this->assertEquals($uri, $uriObj->toString());
     }
 }
 

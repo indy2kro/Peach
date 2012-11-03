@@ -33,6 +33,13 @@ class Peach_Http_Response
         self::PART_HEADERS => array(),
         self::PART_BODY => null
     );
+    
+    /**
+     * Raw response
+     * 
+     * @var string
+     */
+    protected $_rawResponse;
 
     /**
      * Constructor
@@ -164,6 +171,63 @@ class Peach_Http_Response
     public function setParts(Array $parts)
     {
         $this->_parts = array_merge($this->_parts, $parts);
+    }
+    
+    /**
+     * Set raw response
+     * 
+     * @param string $rawResponse
+     * @return void
+     */
+    public function setRawResponse($rawResponse)
+    {
+        $this->_rawResponse = $rawResponse;
+        
+        // parse response
+        $this->_parseRawResponse();
+    }
+    
+    /**
+     * Get raw response
+     * 
+     * @return string|null
+     */
+    public function getRawResponse()
+    {
+        return $this->_rawResponse;
+    }
+    
+    /**
+     * Get headers
+     * 
+     * @return array
+     */
+    public function getHeaders()
+    {
+        return $this->_parts[self::PART_HEADERS];
+    }
+    
+    /**
+     * Get header value
+     * 
+     * @param string $header
+     * @return string|null
+     */
+    public function getHeader($header)
+    {
+        if (array_key_exists($header, $this->_parts[self::PART_HEADERS])) {
+            return $this->_parts[self::PART_HEADERS][$header];
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Parse raw response
+     */
+    protected function _parseRawResponse()
+    {
+        // TODO
     }
 }
 

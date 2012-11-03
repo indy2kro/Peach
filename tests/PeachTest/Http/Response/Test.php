@@ -202,6 +202,37 @@ class PeachTest_Http_Response_Test extends PHPUnit_Framework_TestCase
         $response = new Peach_Http_Response($parts);
         $this->assertTrue($response->isSuccess());
     }
+    
+    public function testRawResponse()
+    {
+        $rawResponse = '';
+        
+        $response = new Peach_Http_Response();
+        $response->setRawResponse($rawResponse);
+        
+        $this->assertEquals($rawResponse, $response->getRawResponse());
+    }
+    
+    public function testGetHeaders()
+    {
+        $headerName = 'Content-Type';
+        $headerValue = 'text/html';
+        
+        $parts = array(
+            Peach_Http_Response::PART_HEADERS => array(
+                $headerName => $headerValue
+            )
+        );
+        
+        $response = new Peach_Http_Response($parts);
+        
+        $headers = $response->getHeaders();
+        $this->assertCount(1, $headers);
+        
+        $this->assertEquals($headerValue, $response->getHeader($headerName));
+        $this->assertNull($response->getHeader('NonExistent'));
+        
+    }
 }
 
 /* EOF */

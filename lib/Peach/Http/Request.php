@@ -63,6 +63,13 @@ class Peach_Http_Request
     );
     
     /**
+     * Raw request
+     * 
+     * @var string
+     */
+    protected $_rawRequest;
+    
+    /**
      * Constructor
      *
      * @param Peach_Http_Uri|string uri
@@ -225,6 +232,27 @@ class Peach_Http_Request
         }
         
         return $this->_options[self::OPT_URI];
+    }
+    
+    /**
+     * Set raw request
+     * 
+     * @param string $rawRequest
+     * @return void
+     */
+    public function setRawRequest($rawRequest)
+    {
+        $this->_rawRequest = $rawRequest;
+    }
+    
+    /**
+     * Get raw request
+     * 
+     * @return string|null
+     */
+    public function getRawRequest()
+    {
+        return $this->_rawRequest;
     }
 }
 
