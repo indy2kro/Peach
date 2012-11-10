@@ -4,7 +4,9 @@
             <directory>./PeachTest</directory>
         </testsuite>
     </testsuites>
+    <!--
     <logging>
         <log type="coverage-html" target="./codecoverage" charset="UTF-8" />
     </logging>
+    -->
 </phpunit>
