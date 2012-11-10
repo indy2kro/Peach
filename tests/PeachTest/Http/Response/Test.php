@@ -205,12 +205,22 @@ class PeachTest_Http_Response_Test extends PHPUnit_Framework_TestCase
     
     public function testRawResponse()
     {
-        $rawResponse = '';
+        $rawResponse = 'HTTP/1.1 200 OK';
         
         $response = new Peach_Http_Response();
         $response->setRawResponse($rawResponse);
         
         $this->assertEquals($rawResponse, $response->getRawResponse());
+    }
+    
+    public function testRawResponseException()
+    {
+        $rawResponse = '';
+        
+        $response = new Peach_Http_Response();
+        
+        $this->setExpectedException('Peach_Http_Response_Exception');
+        $response->setRawResponse($rawResponse);
     }
     
     public function testGetHeaders()

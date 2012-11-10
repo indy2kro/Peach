@@ -8,9 +8,9 @@
  */
 
 /**
- * Peach Http Request Exception
+ * Peach Http Response Exception
  */
-class Peach_Http_Request_Exception extends Peach_Http_Exception
+class Peach_Http_Response_Exception extends Peach_Http_Exception
 {
 }
 

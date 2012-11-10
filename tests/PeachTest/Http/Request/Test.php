@@ -108,7 +108,7 @@ class PeachTest_Http_Request_Test extends PHPUnit_Framework_TestCase
     
     public function testRawRequest()
     {
-        $rawRequest = '';
+        $rawRequest = 'HTTP/1.1 200 OK';
         
         $request = new Peach_Http_Request();
         $request->setRawRequest($rawRequest);

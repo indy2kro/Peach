@@ -170,6 +170,11 @@ class Peach_Http_Response
      */
     public function setParts(Array $parts)
     {
+        if (isset($parts[self::PART_HEADERS])) {
+            // format headers is provided
+            $parts[self::PART_HEADERS] = $this->_formatHeaders($parts[self::PART_HEADERS]);
+        }
+        
         $this->_parts = array_merge($this->_parts, $parts);
     }
     
@@ -215,6 +220,9 @@ class Peach_Http_Response
      */
     public function getHeader($header)
     {
+        // all headers are stored lowercase
+        $header = strtolower($header);
+        
         if (array_key_exists($header, $this->_parts[self::PART_HEADERS])) {
             return $this->_parts[self::PART_HEADERS][$header];
         }
@@ -227,7 +235,69 @@ class Peach_Http_Response
      */
     protected function _parseRawResponse()
     {
-        // TODO
+        $lines = explode("\r\n", $this->_rawResponse);
+        
+        if (!is_array($lines) || 1 == count($lines)) {
+            $lines = explode("\n", $this->_rawResponse);
+        }
+        
+        $firstLine = array_shift($lines);
+
+        $matches = array();
+        
+        if (!preg_match('/^HTTP\/(?P<version>1\.[01]) (?P<status>\d{3})(?:[ ]+(?P<reason>.*))?$/', $firstLine, $matches)) {
+            throw new Peach_Http_Response_Exception('A valid response status line was not found in the provided string');
+        }
+
+        $this->_parts[self::PART_HTTP_VERSION] = $matches['version'];
+        $this->_parts[self::PART_STATUS_CODE] = $matches['status'];
+        $this->_parts[self::PART_STATUS_STRING] = (isset($matches['reason']) ? $matches['reason'] : '');
+        
+        if (0 == count($lines)) {
+            return null;
+        }
+        
+        $headers = array();
+        $bodyLines = array();
+        
+        $isHeader = true;
+        foreach ($lines as $line) {
+            if ($isHeader && empty($line)) {
+                $isHeader = false;
+                continue;
+            }
+            
+            
+            if ($isHeader) {
+                $headers[] = $line;
+            } else {
+                $bodyLines[] = $line;
+            }
+        }
+        
+        $body = implode("\r\n", $bodyLines);
+        
+        $this->_parts[self::PART_HEADERS] = $headers;
+        $this->_parts[self::PART_BODY] = $body;
+    }
+    
+    /**
+     * Format headers
+     * 
+     * @param array $headers
+     * @return array
+     */
+    protected function _formatHeaders(Array $headers)
+    {
+        $formatted = array();
+        
+        foreach ($headers as $headerKey => $headerValue) {
+            $headerKey = strtolower(trim($headerKey));
+            
+            $formatted[$headerKey] = $headerValue;
+        }
+        
+        return $formatted;
     }
 }
 

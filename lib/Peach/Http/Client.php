@@ -23,8 +23,19 @@ class Peach_Http_Client
      */
     const HEADER_HOST = 'Host';
     const HEADER_LOCATION = 'Location';
+    const HEADER_TRANSFER_ENCODING = 'Transfer-Encoding';
     const HEADER_CONTENT_TYPE = 'Content-Type';
     const HEADER_CONTENT_LENGTH = 'Content-Length';
+    const HEADER_CONNECTION = 'Connection';
+    
+    /*
+     * Available transfer encodings
+     */
+    const TRANSFER_ENCODING_CHUNKED = 'chunked';
+    const TRANSFER_ENCODING_COMPRESS = 'compress';
+    const TRANSFER_ENCODING_DEFLATE = 'deflate';
+    const TRANSFER_ENCODING_GZIP = 'gzip';
+    const TRANSFER_ENCODING_IDENTITY = 'identity';
     
     /*
      * Available options
@@ -281,7 +292,12 @@ class Peach_Http_Client
     protected function _doRequest(Peach_Http_Uri $uri, Peach_Http_Request $request)
     {
         $host = $uri->getPart(Peach_Http_Uri::PART_HOST);
-        $port = $uri->getPart(Peach_Http_Uri::PART_PORT);
+        $port = (int)$uri->getPart(Peach_Http_Uri::PART_PORT);
+        
+        if (empty($port)) {
+            $port = 80;
+        }
+        
         $secure = ($uri->getPart(Peach_Http_Uri::PART_SCHEME) == Peach_Http_Uri::SCHEME_HTTPS) ? true : false;
         
         // connect to the remote host

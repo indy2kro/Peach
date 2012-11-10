@@ -19,6 +19,7 @@ abstract class Peach_Http_Client_Adapter_Abstract
     const OPT_HTTP_VERSION = 'http_version';
     const OPT_TIMEOUT = 'timeout';
     const OPT_KEEP_ALIVE = 'keep_alive';
+    const OPT_BUFFER_SIZE = 'buffer_size';
     
     /**
      * Options
@@ -29,7 +30,8 @@ abstract class Peach_Http_Client_Adapter_Abstract
         self::OPT_PERSISTENT => false,
         self::OPT_HTTP_VERSION => Peach_Http_Client::HTTP_VERSION_11,
         self::OPT_TIMEOUT => 10,
-        self::OPT_KEEP_ALIVE => false
+        self::OPT_KEEP_ALIVE => false,
+        self::OPT_BUFFER_SIZE => 8192
     );
     
     /**

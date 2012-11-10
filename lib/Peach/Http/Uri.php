@@ -186,7 +186,7 @@ class Peach_Http_Uri
         }
         
         if (isset($parts['port'])) {
-            $this->_parts[self::PART_PORT] = $parts['port'];
+            $this->_parts[self::PART_PORT] = (int)$parts['port'];
         }
         
         if (isset($parts['user'])) {
