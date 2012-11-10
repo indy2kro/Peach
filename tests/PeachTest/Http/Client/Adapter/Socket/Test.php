@@ -19,6 +19,7 @@ class PeachTest_Http_Client_Adapter_Socket_Test extends PHPUnit_Framework_TestCa
         
         $adapter = new Peach_Http_Client_Adapter_Socket();
         $adapter->connect($host, $port);
+        $adapter->close();
     }
     
     public function testConnectPersistent()
@@ -32,6 +33,7 @@ class PeachTest_Http_Client_Adapter_Socket_Test extends PHPUnit_Framework_TestCa
         
         $adapter = new Peach_Http_Client_Adapter_Socket($options);
         $adapter->connect($host, $port);
+        $adapter->close();
     }
     
     public function testAlreadyConnected()
@@ -45,6 +47,7 @@ class PeachTest_Http_Client_Adapter_Socket_Test extends PHPUnit_Framework_TestCa
         $result = $adapter->connect($host, $port);
         
         $this->assertNull($result);
+        $adapter->close();
     }
     
     public function testConnectFailed()
@@ -56,6 +59,7 @@ class PeachTest_Http_Client_Adapter_Socket_Test extends PHPUnit_Framework_TestCa
         
         $this->setExpectedException('Peach_Http_Client_Adapter_Exception');
         $adapter->connect($host, $port);
+        $adapter->close();
     }
     
     public function testWrite()
@@ -63,16 +67,13 @@ class PeachTest_Http_Client_Adapter_Socket_Test extends PHPUnit_Framework_TestCa
         $method = 'GET';
         $uri = new Peach_Http_Uri('http://www.google.com');
         $host = $uri->getPart(Peach_Http_Uri::PART_HOST);
-        
-        $port = $uri->getPart(Peach_Http_Uri::PART_PORT);
-        if (is_null($port)) {
-            $port = 80;
-        }
+        $port = 80;
         
         $adapter = new Peach_Http_Client_Adapter_Socket();
         $adapter->connect($host, $port);
         
         $headers = array(
+            Peach_Http_Client::HEADER_ACCEPT_ENCODING => 'identity',
             Peach_Http_Client::HEADER_CONNECTION => 'close'
         );
         
@@ -85,18 +86,20 @@ class PeachTest_Http_Client_Adapter_Socket_Test extends PHPUnit_Framework_TestCa
     public function testRead()
     {
         $method = 'GET';
-        $uri = new Peach_Http_Uri('http://www.github.com');
+        $uri = new Peach_Http_Uri('http://www.freesoft.org/CIE/RFC/2068/158.htm');
         $host = $uri->getPart(Peach_Http_Uri::PART_HOST);
-        
-        $port = $uri->getPart(Peach_Http_Uri::PART_PORT);
-        if (is_null($port)) {
-            $port = 80;
-        }
+        $port = 80;
         
         $adapter = new Peach_Http_Client_Adapter_Socket();
         $adapter->connect($host, $port);
         
-        $adapter->write($method, $uri);
+        $headers = array(
+            Peach_Http_Client::HEADER_HOST => $host,
+            Peach_Http_Client::HEADER_ACCEPT_ENCODING => 'identity',
+            Peach_Http_Client::HEADER_USER_AGENT => 'Peach_Http_Client'
+        );
+        
+        $adapter->write($method, $uri, $headers);
         
         $result = $adapter->read();
         

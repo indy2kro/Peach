@@ -24,9 +24,12 @@ class Peach_Http_Client
     const HEADER_HOST = 'Host';
     const HEADER_LOCATION = 'Location';
     const HEADER_TRANSFER_ENCODING = 'Transfer-Encoding';
+    const HEADER_CONTENT_ENCODING = 'Content-Encoding';
+    const HEADER_ACCEPT_ENCODING = 'Accept-encoding';
     const HEADER_CONTENT_TYPE = 'Content-Type';
     const HEADER_CONTENT_LENGTH = 'Content-Length';
     const HEADER_CONNECTION = 'Connection';
+    const HEADER_USER_AGENT = 'User-Agent';
     
     /*
      * Available transfer encodings
@@ -304,9 +307,12 @@ class Peach_Http_Client
         $this->_adapter->connect($host, $port, $secure);
         
         $method = $request->getMethod();
-        $headers = array(); // TODO
+        
         $body = ''; // TODO
         
+        // headers
+        $headers = $this->_prepareHeaders($uri, $body);
+
         // write request
         $rawRequest = $this->_adapter->write($method, $uri, $headers, $body);
         $request->setRawRequest($rawRequest);
@@ -315,10 +321,59 @@ class Peach_Http_Client
         $rawResponse = $this->_adapter->read();
         
         // build response object
-        $response = new Peach_Http_Response();
-        $response->setRawResponse($rawResponse);
+        $this->_response = new Peach_Http_Response();
+        $this->_response->setRawResponse($rawResponse);
         
-        return $response;
+        return $this->_response;
+    }
+    
+    /**
+     * Prepare headers
+     * 
+     * @param Peach_Http_Uri $uri
+     * @param string         $body
+     * @return array
+     */
+    protected function _prepareHeaders(Peach_Http_Uri $uri, $body)
+    {
+        $headers = array();
+        
+        // set host header
+        if (self::HTTP_VERSION_11 == $this->_options[self::OPT_HTTP_VERSION]) {
+            $host = $uri->getPart(Peach_Http_Uri::PART_HOST);
+            
+            // use the scheme to determine if port is needed
+            $scheme = $uri->getPart(Peach_Http_Uri::PART_SCHEME);
+            
+            // add the port if needed
+            $port = $uri->getPart(Peach_Http_Uri::PART_PORT);
+            
+            // don't add the port if the value is default one
+            if (!empty($port) && ! ((Peach_Http_Uri::SCHEME_HTTP == $scheme && 80 == $port) || (Peach_Http_Uri::SCHEME_HTTPS == $scheme && 443 == $port))) {
+                $host .= ':' . $port;
+            }
+            
+            $headers[self::HEADER_HOST] = $host;
+        }
+        
+        // add keep-alive header
+        if (!$this->_options[self::OPT_KEEP_ALIVE]) {
+            $headers[self::HEADER_CONNECTION] = 'close';
+        }
+        
+        // add user agent
+        if (!empty($this->_options[self::OPT_USER_AGENT])) {
+            $headers[self::HEADER_USER_AGENT] = $this->_options[self::OPT_USER_AGENT];
+        }
+        
+        // check if zlib library is available in order to accept compressed encoding
+        if (function_exists('gzinflate')) {
+            $headers[self::HEADER_ACCEPT_ENCODING] = 'gzip, deflate';
+        } else {
+            $headers[self::HEADER_ACCEPT_ENCODING] = 'identity';
+        }
+        
+        return $headers;
     }
 }
 

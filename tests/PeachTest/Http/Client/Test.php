@@ -120,8 +120,21 @@ class PeachTest_Http_Client_Test extends PHPUnit_Framework_TestCase
         $uri = 'http://www.cl.cam.ac.uk/~mgk25/ucs/examples/UTF-8-test.txt';
         
         $client = new Peach_Http_Client($uri);
-        $client->send();
+        $response = $client->send();
         
+        $body = $response->getBody();
+        $this->assertNotNull($body);
+    }
+    
+    public function testGzipRequest()
+    {
+        $uri = 'http://www.tools4noobs.com';
+        
+        $client = new Peach_Http_Client($uri);
+        $response = $client->send();
+        
+        $body = $response->getBody();
+        $this->assertNotNull($body);
     }
 }
 
