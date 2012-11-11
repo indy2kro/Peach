@@ -41,6 +41,12 @@ class Peach_Http_Client
     const TRANSFER_ENCODING_IDENTITY = 'identity';
     
     /*
+     * Encode types
+     */
+    const ENC_FORM_DATA = 'multipart/form-data';
+    const ENC_FORM_URLENCODED = 'application/x-www-form-urlencoded';
+    
+    /*
      * Available options
      */
     const OPT_ADAPTER_TYPE = 'adapter_type';
@@ -306,13 +312,15 @@ class Peach_Http_Client
         // connect to the remote host
         $this->_adapter->connect($host, $port, $secure);
         
-        $method = $request->getMethod();
+        // prepare body
+        $body = $this->_prepareBody($request);
         
-        $body = ''; // TODO
-        
-        // headers
+        // prepare headers
         $headers = $this->_prepareHeaders($uri, $body);
 
+        // get method
+        $method = $request->getMethod();
+        
         // write request
         $rawRequest = $this->_adapter->write($method, $uri, $headers, $body);
         $request->setRawRequest($rawRequest);
@@ -325,6 +333,79 @@ class Peach_Http_Client
         $this->_response->setRawResponse($rawResponse);
         
         return $this->_response;
+    }
+    
+    /**
+     * Prepare body content
+     * 
+     * @param Peach_Http_Request $request
+     * @return string
+     * @throws Peach_Http_Client_Exception
+     */
+    protected function _prepareBody(Peach_Http_Request $request)
+    {
+        $body = '';
+        
+        // get method
+        $method = $request->getMethod();
+        
+        // TRACE requests do not have a body
+        if (Peach_Http_Request::METHOD_TRACE == $method) {
+            return $body;
+        }
+        
+        // get post parameters
+        $postParams = $request->getPostParameters();
+        
+        if (count($postParams) > 0) {
+            if (is_null($this->_options[self::OPT_ENC_TYPE])) {
+                $this->_options[self::OPT_ENC_TYPE] = self::ENC_FORM_URLENCODED;
+            }
+            
+            switch ($this->_options[self::OPT_ENC_TYPE]) {
+                case self::ENC_FORM_DATA:
+                    $body = $this->_encFormData($postParams);
+                    break;
+                
+                case self::ENC_FORM_URLENCODED:
+                    $body = $this->_encUrlEncode($postParams);
+                    break;
+                
+                default:
+                    throw new Peach_Http_Client_Exception("Cannot handle specified content type: '" . $this->_options[self::OPT_ENC_TYPE] . "'");
+                    break;
+            }
+        }
+        
+        return $body;
+    }
+    
+    /**
+     * Encode body as multipart/form-data
+     * 
+     * @param array $postParams
+     * @return string
+     */
+    protected function _encFormData(Array $postParams)
+    {
+        $encoded = '';
+        
+        // TODO
+        
+        return $encoded;
+    }
+    
+    /**
+     * Encode body as application/x-www-form-urlencoded
+     * 
+     * @param array $postParams
+     * @return type
+     */
+    protected function _encUrlEncode(Array $postParams)
+    {
+        $encoded = http_build_query($postParams, '', '&');
+        
+        return $encoded;
     }
     
     /**
@@ -372,6 +453,13 @@ class Peach_Http_Client
         } else {
             $headers[self::HEADER_ACCEPT_ENCODING] = 'identity';
         }
+        
+        if (!is_null($this->_options[self::OPT_ENC_TYPE])) {
+            $headers[self::HEADER_CONTENT_TYPE] = $this->_options[self::OPT_ENC_TYPE];
+        }
+        
+        // set content length
+        $headers[self::HEADER_CONTENT_LENGTH] = strlen($body);
         
         return $headers;
     }

@@ -1,3 +1,4 @@
 /tests/codecoverage/
 /doc/
 /tests/phpunit.xml
+/_internal/

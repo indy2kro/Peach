@@ -366,7 +366,7 @@ class Peach_Http_Response
 
         // check transfer encoding
         if ('chunked' == $transferEncoding) {
-            return $this->_decodeChunkedBody($body);
+            $body = $this->_decodeChunkedBody($body);
         }
         
         // check content encoding
@@ -374,10 +374,12 @@ class Peach_Http_Response
 
         switch ($contentEncoding) {
             case 'gzip':
-                return $this->_decodeGzipBody($body);
+                $body = $this->_decodeGzipBody($body);
+                break;
             
             case 'deflate':
-                return $this->_decodeDeflateBody($body);
+                $body = $this->_decodeDeflateBody($body);
+                break;
             
             default:
                 // nothing to do
