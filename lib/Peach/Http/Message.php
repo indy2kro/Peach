@@ -19,7 +19,7 @@ abstract class Peach_Http_Message
     const HEADER_LOCATION = 'Location';
     const HEADER_TRANSFER_ENCODING = 'Transfer-Encoding';
     const HEADER_CONTENT_ENCODING = 'Content-Encoding';
-    const HEADER_ACCEPT_ENCODING = 'Accept-encoding';
+    const HEADER_ACCEPT_ENCODING = 'Accept-Encoding';
     const HEADER_CONTENT_TYPE = 'Content-Type';
     const HEADER_CONTENT_LENGTH = 'Content-Length';
     const HEADER_CONNECTION = 'Connection';
