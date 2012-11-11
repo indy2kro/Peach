@@ -165,7 +165,7 @@ class PeachTest_Http_Client_Test extends PHPUnit_Framework_TestCase
     {
         $uri = 'http://google.com/';
         
-        $client = new Peach_Http_Client();
+        $client = new Peach_Http_Client($uri);
         $client->setMethod(Peach_Http_Request::METHOD_TRACE);
         $response = $client->send();
         
