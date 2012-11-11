@@ -196,7 +196,7 @@ class Peach_Http_Client_Adapter_Socket extends Peach_Http_Client_Adapter_Abstrac
         // stop if the request was a HEAD or a 204/304 status was received
         if ($statusCode == 304 || $statusCode == 204 || $this->_method == Peach_Http_Request::METHOD_HEAD) {
             // close the connection if requested to do so by the server
-            $connection = $responseObj->getHeader(Peach_Http_Client::HEADER_CONNECTION);
+            $connection = $responseObj->getHeader(Peach_Http_Message::HEADER_CONNECTION);
             
             if (strtolower($connection) == 'close') {
                 $this->close();
@@ -206,7 +206,7 @@ class Peach_Http_Client_Adapter_Socket extends Peach_Http_Client_Adapter_Abstrac
         }
 
         // check transfer encoding
-        $contentLength = $responseObj->getHeader(Peach_Http_Client::HEADER_CONTENT_LENGTH);
+        $contentLength = $responseObj->getHeader(Peach_Http_Message::HEADER_CONTENT_LENGTH);
         
         if (!is_null($contentLength)) {
             // read until end the length defined
@@ -249,7 +249,7 @@ class Peach_Http_Client_Adapter_Socket extends Peach_Http_Client_Adapter_Abstrac
         }
         
         // close the connection if requested to do so by the server
-        $connection = $responseObj->getHeader(Peach_Http_Client::HEADER_CONNECTION);
+        $connection = $responseObj->getHeader(Peach_Http_Message::HEADER_CONNECTION);
 
         if (strtolower($connection) == 'close') {
             $this->close();

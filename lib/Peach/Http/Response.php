@@ -10,7 +10,7 @@
 /**
  * HTTP response implementation
  */
-class Peach_Http_Response
+class Peach_Http_Response extends Peach_Http_Message
 {
     /*
      * Available parts
@@ -18,8 +18,6 @@ class Peach_Http_Response
     const PART_HTTP_VERSION = 'http_version';
     const PART_STATUS_CODE = 'status_code';
     const PART_STATUS_STRING = 'status_string';
-    const PART_HEADERS = 'headers';
-    const PART_BODY = 'body';
     
     /**
      * Response parts
@@ -35,20 +33,16 @@ class Peach_Http_Response
     );
     
     /**
-     * Raw response
-     * 
-     * @var string
-     */
-    protected $_rawResponse;
-
-    /**
      * Constructor
      * 
-     * @param array $parts
+     * @param array              $parts
+     * @param array|Peach_Config $options
      * @return void
      */
-    public function __construct(Array $parts = array())
+    public function __construct(Array $parts = array(), $options = array())
     {
+        parent::__construct($options);
+        
         $this->setParts($parts);
     }
     
@@ -163,22 +157,6 @@ class Peach_Http_Response
     }
 
     /**
-     * Set parts
-     * 
-     * @param array $parts
-     * @return void
-     */
-    public function setParts(Array $parts)
-    {
-        if (isset($parts[self::PART_HEADERS])) {
-            // format headers if provided
-            $parts[self::PART_HEADERS] = $this->_formatHeaders($parts[self::PART_HEADERS]);
-        }
-        
-        $this->_parts = array_merge($this->_parts, $parts);
-    }
-    
-    /**
      * Set raw response
      * 
      * @param string  $rawResponse
@@ -187,7 +165,7 @@ class Peach_Http_Response
      */
     public function setRawResponse($rawResponse, $parseResponse = true)
     {
-        $this->_rawResponse = $rawResponse;
+        $this->_rawData = $rawResponse;
         
         // parse response
         if ($parseResponse) {
@@ -202,45 +180,7 @@ class Peach_Http_Response
      */
     public function getRawResponse()
     {
-        return $this->_rawResponse;
-    }
-    
-    /**
-     * Get headers
-     * 
-     * @return array
-     */
-    public function getHeaders()
-    {
-        return $this->_parts[self::PART_HEADERS];
-    }
-    
-    /**
-     * Get body
-     * 
-     * @return string
-     */
-    public function getBody()
-    {
-        return $this->_parts[self::PART_BODY];
-    }
-    
-    /**
-     * Get header value
-     * 
-     * @param string $header
-     * @return string|null
-     */
-    public function getHeader($header)
-    {
-        // all headers are stored lowercase
-        $header = strtolower($header);
-        
-        if (array_key_exists($header, $this->_parts[self::PART_HEADERS])) {
-            return $this->_parts[self::PART_HEADERS][$header];
-        }
-        
-        return null;
+        return $this->_rawData;
     }
     
     /**
@@ -248,10 +188,10 @@ class Peach_Http_Response
      */
     protected function _parseRawResponse()
     {
-        $lines = explode("\r\n", $this->_rawResponse);
+        $lines = explode("\r\n", $this->_rawData);
         
         if (!is_array($lines) || 1 == count($lines)) {
-            $lines = explode("\n", $this->_rawResponse);
+            $lines = explode("\n", $this->_rawData);
         }
         
         $firstLine = array_shift($lines);
@@ -362,7 +302,7 @@ class Peach_Http_Response
      */
     protected function _decodeBody($body)
     {
-        $transferEncoding = strtolower($this->getHeader(Peach_Http_Client::HEADER_TRANSFER_ENCODING));
+        $transferEncoding = strtolower($this->getHeader(Peach_Http_Message::HEADER_TRANSFER_ENCODING));
 
         // check transfer encoding
         if ('chunked' == $transferEncoding) {
@@ -370,7 +310,7 @@ class Peach_Http_Response
         }
         
         // check content encoding
-        $contentEncoding = strtolower($this->getHeader(Peach_Http_Client::HEADER_CONTENT_ENCODING));
+        $contentEncoding = strtolower($this->getHeader(Peach_Http_Message::HEADER_CONTENT_ENCODING));
 
         switch ($contentEncoding) {
             case 'gzip':
@@ -460,25 +400,6 @@ class Peach_Http_Response
             return gzuncompress($body);
         }
         return gzinflate($body);
-    }
-    
-    /**
-     * Format headers
-     * 
-     * @param array $headers
-     * @return array
-     */
-    protected function _formatHeaders(Array $headers)
-    {
-        $formatted = array();
-        
-        foreach ($headers as $headerKey => $headerValue) {
-            $headerKey = strtolower(trim($headerKey));
-            
-            $formatted[$headerKey] = $headerValue;
-        }
-        
-        return $formatted;
     }
 }
 

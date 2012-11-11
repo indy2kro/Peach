@@ -10,7 +10,7 @@
 /**
  * HTTP request implementation
  */
-class Peach_Http_Request
+class Peach_Http_Request extends Peach_Http_Message
 {
     /*
      * Available methods
@@ -63,41 +63,19 @@ class Peach_Http_Request
     );
     
     /**
-     * Raw request
-     * 
-     * @var string
-     */
-    protected $_rawRequest;
-    
-    /**
      * Constructor
      *
-     * @param Peach_Http_Uri|string uri
+     * @param Peach_Http_Uri|string $uri
      * @param array|Peach_Config    $options
      * @return void
      */
     public function __construct($uri = null, $options = array())
     {
+        parent::__construct($options);
+        
         if (!is_null($uri)) {
             $this->setUri($uri);
         }
-        
-        $this->setOptions($options);
-    }
-    
-    /**
-     * Set options
-     *
-     * @param array|Peach_Config $options
-     * @return void
-     */
-    public function setOptions($options = array())
-    {
-        if ($options instanceof Peach_Config) {
-            $options = $options->toArray();
-        }
-        
-        $this->_options = array_merge($this->_options, $options);
     }
     
     /**
@@ -242,7 +220,7 @@ class Peach_Http_Request
      */
     public function setRawRequest($rawRequest)
     {
-        $this->_rawRequest = $rawRequest;
+        $this->_rawData = $rawRequest;
     }
     
     /**
@@ -252,7 +230,7 @@ class Peach_Http_Request
      */
     public function getRawRequest()
     {
-        return $this->_rawRequest;
+        return $this->_rawData;
     }
 }
 

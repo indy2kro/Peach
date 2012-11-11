@@ -19,19 +19,6 @@ class Peach_Http_Client
     const HTTP_VERSION_11 = '1.1';
     
     /*
-     * Available headers (only the headers used by the client are listed)
-     */
-    const HEADER_HOST = 'Host';
-    const HEADER_LOCATION = 'Location';
-    const HEADER_TRANSFER_ENCODING = 'Transfer-Encoding';
-    const HEADER_CONTENT_ENCODING = 'Content-Encoding';
-    const HEADER_ACCEPT_ENCODING = 'Accept-encoding';
-    const HEADER_CONTENT_TYPE = 'Content-Type';
-    const HEADER_CONTENT_LENGTH = 'Content-Length';
-    const HEADER_CONNECTION = 'Connection';
-    const HEADER_USER_AGENT = 'User-Agent';
-    
-    /*
      * Available transfer encodings
      */
     const TRANSFER_ENCODING_CHUNKED = 'chunked';
@@ -303,7 +290,7 @@ class Peach_Http_Client
                 break;
             }
             
-            $uri->setUri($response->getHeader(self::HEADER_LOCATION));
+            $uri->setUri($response->getHeader(Peach_Http_Message::HEADER_LOCATION));
             $request->setUri($uri);
             
             $redirectCounter++;
@@ -455,33 +442,33 @@ class Peach_Http_Client
                 $host .= ':' . $port;
             }
             
-            $headers[self::HEADER_HOST] = $host;
+            $headers[Peach_Http_Message::HEADER_HOST] = $host;
         }
         
         // add keep-alive header
         if (!$this->_options[self::OPT_KEEP_ALIVE]) {
-            $headers[self::HEADER_CONNECTION] = 'close';
+            $headers[Peach_Http_Message::HEADER_CONNECTION] = 'close';
         }
         
         // add user agent
         if (!empty($this->_options[self::OPT_USER_AGENT])) {
-            $headers[self::HEADER_USER_AGENT] = $this->_options[self::OPT_USER_AGENT];
+            $headers[Peach_Http_Message::HEADER_USER_AGENT] = $this->_options[self::OPT_USER_AGENT];
         }
         
         // check if zlib library is available in order to accept compressed encoding
         if (function_exists('gzinflate')) {
-            $headers[self::HEADER_ACCEPT_ENCODING] = 'gzip, deflate';
+            $headers[Peach_Http_Message::HEADER_ACCEPT_ENCODING] = 'gzip, deflate';
         } else {
-            $headers[self::HEADER_ACCEPT_ENCODING] = 'identity';
+            $headers[Peach_Http_Message::HEADER_ACCEPT_ENCODING] = 'identity';
         }
         
         if (!is_null($this->_options[self::OPT_ENC_TYPE])) {
-            $headers[self::HEADER_CONTENT_TYPE] = $this->_options[self::OPT_ENC_TYPE];
+            $headers[Peach_Http_Message::HEADER_CONTENT_TYPE] = $this->_options[self::OPT_ENC_TYPE];
         }
         
         // set content length
         if (!empty($body)) {
-            $headers[self::HEADER_CONTENT_LENGTH] = strlen($body);
+            $headers[Peach_Http_Message::HEADER_CONTENT_LENGTH] = strlen($body);
         }
         
         return $headers;

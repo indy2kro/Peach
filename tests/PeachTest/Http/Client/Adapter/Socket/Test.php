@@ -73,8 +73,8 @@ class PeachTest_Http_Client_Adapter_Socket_Test extends PHPUnit_Framework_TestCa
         $adapter->connect($host, $port);
         
         $headers = array(
-            Peach_Http_Client::HEADER_ACCEPT_ENCODING => 'identity',
-            Peach_Http_Client::HEADER_CONNECTION => 'close'
+            Peach_Http_Message::HEADER_ACCEPT_ENCODING => 'identity',
+            Peach_Http_Message::HEADER_CONNECTION => 'close'
         );
         
         $request = $adapter->write($method, $uri, $headers);
@@ -94,9 +94,9 @@ class PeachTest_Http_Client_Adapter_Socket_Test extends PHPUnit_Framework_TestCa
         $adapter->connect($host, $port);
         
         $headers = array(
-            Peach_Http_Client::HEADER_HOST => $host,
-            Peach_Http_Client::HEADER_ACCEPT_ENCODING => 'identity',
-            Peach_Http_Client::HEADER_USER_AGENT => 'Peach_Http_Client'
+            Peach_Http_Message::HEADER_HOST => $host,
+            Peach_Http_Message::HEADER_ACCEPT_ENCODING => 'identity',
+            Peach_Http_Message::HEADER_USER_AGENT => 'Peach_Http_Client'
         );
         
         $adapter->write($method, $uri, $headers);
