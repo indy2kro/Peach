@@ -10,7 +10,7 @@
 /**
  * Peach_Config_Ini tests
  */
-class PeachTest_Config_Ini_Test extends PHPUnit_Framework_TestCase
+class PeachTest_Config_Ini_Test extends PeachTest_TestCase
 {
     public function testEmptyIniFileName()
     {

@@ -10,7 +10,7 @@
 /**
  * Peach_Log_Event tests
  */
-class PeachTest_Log_Event_Test extends PHPUnit_Framework_TestCase
+class PeachTest_Log_Event_Test extends PeachTest_TestCase
 {
     public function testValidEvent()
     {

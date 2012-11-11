@@ -10,7 +10,7 @@
 /**
  * Peach_Http_Response tests
  */
-class PeachTest_Http_Response_Test extends PHPUnit_Framework_TestCase
+class PeachTest_Http_Response_Test extends PeachTest_TestCase
 {
     public function testConstructor()
     {

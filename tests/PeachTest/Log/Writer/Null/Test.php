@@ -10,7 +10,7 @@
 /**
  * Peach_Log_Writer_Null tests
  */
-class PeachTest_Log_Writer_Null_Test extends PHPUnit_Framework_TestCase
+class PeachTest_Log_Writer_Null_Test extends PeachTest_TestCase
 {
     public function testValid()
     {

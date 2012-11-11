@@ -10,7 +10,7 @@
 /**
  * Peach_Log_Filter_Priority tests
  */
-class PeachTest_Log_Filter_Priority_Test extends PHPUnit_Framework_TestCase
+class PeachTest_Log_Filter_Priority_Test extends PeachTest_TestCase
 {
     public function testValid()
     {

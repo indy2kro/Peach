@@ -10,7 +10,7 @@
 /**
  * Peach_Http_Client_Adapter_Socket tests
  */
-class PeachTest_Http_Client_Adapter_Socket_Test extends PHPUnit_Framework_TestCase
+class PeachTest_Http_Client_Adapter_Socket_Test extends PeachTest_TestCase
 {
     public function testConnect()
     {

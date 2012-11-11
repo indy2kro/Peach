@@ -10,7 +10,7 @@
 /**
  * Peach_Http_Client tests
  */
-class PeachTest_Http_Client_Test extends PHPUnit_Framework_TestCase
+class PeachTest_Http_Client_Test extends PeachTest_TestCase
 {
     public function testConstructor()
     {
@@ -201,8 +201,10 @@ class PeachTest_Http_Client_Test extends PHPUnit_Framework_TestCase
             $previousMemoryUsed = $memoryUsed;
             $memoryUsed = memory_get_usage();
             
-            if (!is_null($previousMemoryUsed) && $previousMemoryUsed != $memoryUsed) {
-                $this->fail('Memory leak detected!');
+            if (!is_null($previousMemoryUsed) && $memoryUsed > $previousMemoryUsed) {
+                $this->fail('Memory leak detected! Current memory usage: '
+                        . $this->_friendlySize($memoryUsed) . ', previous: '
+                        . $this->_friendlySize($previousMemoryUsed));
             }
         }
     }

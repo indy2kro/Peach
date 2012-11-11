@@ -10,7 +10,7 @@
 /**
  * Peach_Registry tests
  */
-class PeachTest_Error_Handler_Test extends PHPUnit_Framework_TestCase
+class PeachTest_Error_Handler_Test extends PeachTest_TestCase
 {
     public function setUp()
     {

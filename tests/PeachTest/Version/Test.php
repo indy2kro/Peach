@@ -10,7 +10,7 @@
 /**
  * Peach_Config tests
  */
-class PeachTest_Version_Test extends PHPUnit_Framework_TestCase
+class PeachTest_Version_Test extends PeachTest_TestCase
 {
     public function testVersion()
     {

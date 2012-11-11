@@ -10,7 +10,7 @@
 /**
  * Peach_Db_Adapter_Mysqli tests
  */
-class PeachTest_Db_Adapter_Mysqli_Test extends PHPUnit_Framework_TestCase
+class PeachTest_Db_Adapter_Mysqli_Test extends PeachTest_TestCase
 {
     /**
      * Db connection

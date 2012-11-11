@@ -10,7 +10,7 @@
 /**
  * Peach_Log tests
  */
-class PeachTest_Log_Test extends PHPUnit_Framework_TestCase
+class PeachTest_Log_Test extends PeachTest_TestCase
 {
     /**
      * Log file

@@ -10,7 +10,7 @@
 /**
  * Peach_Autoloader tests
  */
-class PeachTest_Autoloader_Test extends PHPUnit_Framework_TestCase
+class PeachTest_Autoloader_Test extends PeachTest_TestCase
 {
     public function setUp()
     {

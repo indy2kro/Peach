@@ -10,7 +10,7 @@
 /**
  * Peach_Log_Formatter_Simple tests
  */
-class PeachTest_Log_Formatter_SimpleTest extends PHPUnit_Framework_TestCase
+class PeachTest_Log_Formatter_SimpleTest extends PeachTest_TestCase
 {
     public function testValid()
     {

@@ -10,7 +10,7 @@
 /**
  * Peach_Http_Response_Translator tests
  */
-class PeachTest_Http_Response_Translator_Test extends PHPUnit_Framework_TestCase
+class PeachTest_Http_Response_Translator_Test extends PeachTest_TestCase
 {
     public function testOk()
     {
