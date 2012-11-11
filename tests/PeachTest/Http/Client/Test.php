@@ -163,7 +163,7 @@ class PeachTest_Http_Client_Test extends PHPUnit_Framework_TestCase
     
     public function testSendTrace()
     {
-        $uri = 'http://localhost/';
+        $uri = 'http://google.com/';
         
         $client = new Peach_Http_Client();
         $client->setMethod(Peach_Http_Request::METHOD_TRACE);
