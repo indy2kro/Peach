@@ -196,6 +196,17 @@ class Peach_Http_Client
     }
 
     /**
+     * Set method
+     * 
+     * @param string $method
+     * @return void
+     */
+    public function setMethod($method)
+    {
+        $this->getRequest()->setMethod($method);
+    }
+
+    /**
      * Set GET parameter
      *
      * @param string $name
@@ -221,15 +232,25 @@ class Peach_Http_Client
      * Set adapter
      * 
      * @param Peach_Http_Client_Adapter_Abstract|string $adapter
+     * @param array                                     $adapterOptions
      * @return void
      * @throws Peach_Http_Client_Exception
      */
-    public function setAdapter($adapter)
+    public function setAdapter($adapter, Array $adapterOptions = array())
     {
+        // set the base options
+        $baseOptions = array(
+            Peach_Http_Client_Adapter_Abstract::OPT_HTTP_VERSION => $this->_options[self::OPT_HTTP_VERSION]
+        );
+        
+        // create final adapter options
+        $adapterOptions = array_merge($baseOptions, $adapterOptions);
+        
         if ($adapter instanceof Peach_Http_Client_Adapter_Abstract) {
             $this->_adapter = $adapter;
+            $this->_adapter->setOptions($adapterOptions);
         } else {
-            $this->_adapter = new $adapter();
+            $this->_adapter = new $adapter($adapterOptions);
             
             if (!$this->_adapter instanceof Peach_Http_Client_Adapter_Abstract) {
                 throw new Peach_Http_Client_Exception('Adapter must be an instance of Peach_Http_Client_Adapter_Abstract');
@@ -459,7 +480,9 @@ class Peach_Http_Client
         }
         
         // set content length
-        $headers[self::HEADER_CONTENT_LENGTH] = strlen($body);
+        if (!empty($body)) {
+            $headers[self::HEADER_CONTENT_LENGTH] = strlen($body);
+        }
         
         return $headers;
     }

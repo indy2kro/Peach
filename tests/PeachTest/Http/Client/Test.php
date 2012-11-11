@@ -126,6 +126,17 @@ class PeachTest_Http_Client_Test extends PHPUnit_Framework_TestCase
         $this->assertNotNull($body);
     }
     
+    public function testRequestWithRedirect()
+    {
+        $uri = 'http://google.com';
+        
+        $client = new Peach_Http_Client($uri);
+        $response = $client->send();
+        
+        $body = $response->getBody();
+        $this->assertNotNull($body);
+    }
+    
     public function testGzipRequest()
     {
         $uri = 'http://www.tools4noobs.com';
@@ -135,6 +146,65 @@ class PeachTest_Http_Client_Test extends PHPUnit_Framework_TestCase
         
         $body = $response->getBody();
         $this->assertNotNull($body);
+    }
+    
+    public function testSendCustom()
+    {
+        $uri = 'http://www.w3.org/2005/10/Process-20051014/';
+        
+        $client = new Peach_Http_Client();
+        
+        $request = new Peach_Http_Request($uri);
+        $response = $client->send($request);
+        
+        $body = $response->getBody();
+        $this->assertNotNull($body);
+    }
+    
+    public function testSendTrace()
+    {
+        $uri = 'http://localhost/';
+        
+        $client = new Peach_Http_Client();
+        $client->setMethod(Peach_Http_Request::METHOD_TRACE);
+        $response = $client->send();
+        
+        $body = $response->getBody();
+        $this->assertNotNull($body);
+    }
+    
+    public function testSetMethod()
+    {
+        $uri = 'http://www.w3.org';
+        
+        $client = new Peach_Http_Client($uri);
+        $client->setMethod(Peach_Http_Request::METHOD_POST);
+        $response = $client->send();
+        
+        $body = $response->getBody();
+        $this->assertNotNull($body);
+    }
+    
+    public function testMemoryLeak()
+    {
+        $uri = 'http://www.w3.org/Protocols/rfc2616/rfc2616-sec1.html';
+        $iterations = 10;
+        
+        $client = null;
+        $memoryUsed = null;
+        $previousMemoryUsed = null;
+        
+        for ($counter = 0; $counter < $iterations; $counter++) {
+            $client = new Peach_Http_Client($uri);
+            $client->send();
+            
+            $previousMemoryUsed = $memoryUsed;
+            $memoryUsed = memory_get_usage();
+            
+            if (!is_null($previousMemoryUsed) && $previousMemoryUsed != $memoryUsed) {
+                $this->fail('Memory leak detected!');
+            }
+        }
     }
 }
 
