@@ -8,7 +8,7 @@
  */
 
 /**
- * Peach_Registry tests
+ * Peach_Socket_Client tests
  */
 class PeachTest_Socket_Client_Test extends PeachTest_TestCase
 {

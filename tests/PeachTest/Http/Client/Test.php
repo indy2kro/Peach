@@ -120,7 +120,7 @@ class PeachTest_Http_Client_Test extends PeachTest_TestCase
         $uri = 'http://www.cl.cam.ac.uk/~mgk25/ucs/examples/UTF-8-test.txt';
         
         $client = new Peach_Http_Client($uri);
-        $response = $client->send();
+        $response = $client->request();
         
         $body = $response->getBody();
         $this->assertNotNull($body);
@@ -131,7 +131,7 @@ class PeachTest_Http_Client_Test extends PeachTest_TestCase
         $uri = 'http://google.com';
         
         $client = new Peach_Http_Client($uri);
-        $response = $client->send();
+        $response = $client->request();
         
         $body = $response->getBody();
         $this->assertNotNull($body);
@@ -142,7 +142,7 @@ class PeachTest_Http_Client_Test extends PeachTest_TestCase
         $uri = 'http://www.tools4noobs.com';
         
         $client = new Peach_Http_Client($uri);
-        $response = $client->send();
+        $response = $client->request();
         
         $body = $response->getBody();
         $this->assertNotNull($body);
@@ -155,7 +155,7 @@ class PeachTest_Http_Client_Test extends PeachTest_TestCase
         $client = new Peach_Http_Client();
         
         $request = new Peach_Http_Request($uri);
-        $response = $client->send($request);
+        $response = $client->request($request);
         
         $body = $response->getBody();
         $this->assertNotNull($body);
@@ -167,7 +167,7 @@ class PeachTest_Http_Client_Test extends PeachTest_TestCase
         
         $client = new Peach_Http_Client($uri);
         $client->setMethod(Peach_Http_Request::METHOD_TRACE);
-        $response = $client->send();
+        $response = $client->request();
         
         $body = $response->getBody();
         $this->assertNotNull($body);
@@ -179,7 +179,7 @@ class PeachTest_Http_Client_Test extends PeachTest_TestCase
         
         $client = new Peach_Http_Client($uri);
         $client->setMethod(Peach_Http_Request::METHOD_POST);
-        $response = $client->send();
+        $response = $client->request();
         
         $body = $response->getBody();
         $this->assertNotNull($body);
@@ -196,7 +196,7 @@ class PeachTest_Http_Client_Test extends PeachTest_TestCase
         
         for ($counter = 0; $counter < $iterations; $counter++) {
             $client = new Peach_Http_Client($uri);
-            $client->send();
+            $client->request();
             
             $previousMemoryUsed = $memoryUsed;
             $memoryUsed = memory_get_usage();
