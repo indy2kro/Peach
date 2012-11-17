@@ -94,10 +94,10 @@ class Peach_Service_Buxfer
     /**
      * Constructor
      *  
-     * @param array $options Options
+     * @param array|Peach_Config $options
      * @return void
      */
-    public function __construct(Array $options = array())
+    public function __construct($options = array())
     {
         // set options
         $this->setOptions($options);
@@ -109,11 +109,15 @@ class Peach_Service_Buxfer
     /**
      * Merge options with incoming values
      * 
-     * @param array $options Options
+     * @param array|Peach_Config $options
      * @return void
      */
-    public function setOptions(Array $options)
+    public function setOptions($options)
     {
+        if ($options instanceof Peach_Config) {
+            $options = $options->toArray();
+        }
+        
         $this->_options = array_merge($this->_options, $options);
         
         if (!is_null($this->_adapter)) {
