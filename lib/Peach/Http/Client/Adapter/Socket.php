@@ -18,11 +18,11 @@ class Peach_Http_Client_Adapter_Socket extends Peach_Http_Client_Adapter_Abstrac
     const LINE_SEPARATOR = "\r\n";
     
     /**
-     * The socket for server connection
+     * The socket client
      *
-     * @var resource
+     * @var Peach_Socket_Client
      */
-    protected $_socket;
+    protected $_socketClient;
     
     /**
      * Connected host
@@ -61,31 +61,20 @@ class Peach_Http_Client_Adapter_Socket extends Peach_Http_Client_Adapter_Abstrac
         }
         
         // already connected
-        if (!is_null($this->_socket)) {
+        if (!is_null($this->_socketClient)) {
             return null;
         }
         
-        // set connect flags
-        $flags = STREAM_CLIENT_CONNECT;
-        if ($this->_options[self::OPT_PERSISTENT]) {
-            $flags |= STREAM_CLIENT_PERSISTENT;
-        }
-
-        Peach_Error_Handler::start();
-        $this->_socket = stream_socket_client($host . ':' . $port, $errno, $errstr, (int) $this->_options[self::OPT_TIMEOUT], $flags);
-        $error = Peach_Error_Handler::stop();
-
-        if (!is_null($error)) {
-            $this->close();
-            
-            throw new Peach_Http_Client_Adapter_Exception('Unable to Connect to ' . $host . ':' . $port . '. Error #' . $errno . ': ' . $errstr);
-        }
+        $socketOptions = array(
+            Peach_Socket_Client::OPT_PERSISTENT => $this->_options[self::OPT_PERSISTENT],
+            Peach_Socket_Client::OPT_TIMEOUT => (int) $this->_options[self::OPT_TIMEOUT],
+            Peach_Socket_Client::OPT_CONNECT_TIMEOUT => (int) $this->_options[self::OPT_TIMEOUT]
+        );
         
-        // Set the stream timeout
-        if (!stream_set_timeout($this->_socket, (int) $this->_options[self::OPT_TIMEOUT])) {
-            throw new Peach_Http_Client_Adapter_Exception('Unable to set the connection timeout');
-        }
-
+        // connect to socket
+        $this->_socketClient = new Peach_Socket_Client($socketOptions);
+        $this->_socketClient->connect($host . ':' . $port);
+        
         $this->_connectedHost = $host;
         $this->_connectedPort = $port;
     }
@@ -101,7 +90,7 @@ class Peach_Http_Client_Adapter_Socket extends Peach_Http_Client_Adapter_Abstrac
      */
     public function write($method, Peach_Http_Uri $uri, Array $headers = array(), $body = '')
     {
-        if (is_null($this->_socket)) {
+        if (is_null($this->_socketClient)) {
             throw new Peach_Http_Client_Adapter_Exception('Trying to write to socket, but not connected');
         }
         
@@ -140,13 +129,7 @@ class Peach_Http_Client_Adapter_Socket extends Peach_Http_Client_Adapter_Abstrac
         $request .= $body;
         
         // Send the request
-        Peach_Error_Handler::start();
-        $writeResult = fwrite($this->_socket, $request);
-        $error = Peach_Error_Handler::stop();
-        
-        if (!$writeResult || !is_null($error)) {
-            throw new Peach_Http_Client_Adapter_Exception('Error writing request to server', 0, $error);
-        }
+        $this->_socketClient->write($request);
         
         return $request;
     }
@@ -163,7 +146,7 @@ class Peach_Http_Client_Adapter_Socket extends Peach_Http_Client_Adapter_Abstrac
         // read headers
         $gotStatus = false;
 
-        while (($line = fgets($this->_socket)) !== false) {
+        while (($line = $this->_socketClient->gets()) !== false) {
             $gotStatus = $gotStatus || (strpos($line, 'HTTP') !== false);
             
             if ($gotStatus) {
@@ -215,10 +198,10 @@ class Peach_Http_Client_Adapter_Socket extends Peach_Http_Client_Adapter_Abstrac
             }
             
             $chunk = '';
-            $currentPos = ftell($this->_socket);
+            $currentPos = $this->_socketClient->tell();
 
-            for ($readTo = $currentPos + $contentLength; $readTo > $currentPos; $currentPos = ftell($this->_socket)) {
-                $chunk = fread($this->_socket, $readTo - $currentPos);
+            for ($readTo = $currentPos + $contentLength; $readTo > $currentPos; $currentPos = $this->_socketClient->tell()) {
+                $chunk = $this->_socketClient->read($readTo - $currentPos);
                 
                 if ($chunk === false || strlen($chunk) === 0) {
                     $this->_checkSocketReadTimeout();
@@ -228,14 +211,14 @@ class Peach_Http_Client_Adapter_Socket extends Peach_Http_Client_Adapter_Abstrac
                 $response .= $chunk;
 
                 // Break if the connection ended prematurely
-                if (feof($this->_socket)) {
+                if ($this->_socketClient->eof()) {
                     break;
                 }
             }
         } else {
             // read until EOF
             do {
-                $buffer = fread($this->_socket, $this->_options[self::OPT_BUFFER_SIZE]);
+                $buffer = $this->_socketClient->read($this->_options[self::OPT_BUFFER_SIZE]);
                 
                 if ($buffer === false || strlen($buffer) === 0) {
                     $this->_checkSocketReadTimeout();
@@ -243,7 +226,7 @@ class Peach_Http_Client_Adapter_Socket extends Peach_Http_Client_Adapter_Abstrac
                 } else {
                     $response .= $buffer;
                 }
-            } while (feof($this->_socket) === false);
+            } while (!$this->_socketClient->eof());
 
             $this->close();
         }
@@ -265,13 +248,12 @@ class Peach_Http_Client_Adapter_Socket extends Peach_Http_Client_Adapter_Abstrac
      */
     public function close()
     {
-        if (is_resource($this->_socket)) {
-            Peach_Error_Handler::start();
-            fclose($this->_socket);
-            Peach_Error_Handler::stop();
+        // close socket client
+        if (!is_null($this->_socketClient)) {
+            $this->_socketClient->close();
         }
         
-        $this->_socket = null;
+        $this->_socketClient = null;
         $this->_connectedHost = null;
         $this->_connectedPort = null;
     }
@@ -284,12 +266,12 @@ class Peach_Http_Client_Adapter_Socket extends Peach_Http_Client_Adapter_Abstrac
      */
     protected function _checkSocketReadTimeout()
     {
-        if (is_null($this->_socket)) {
+        if (is_null($this->_socketClient)) {
             return null;
         }
         
         // get stream metadata
-        $info = stream_get_meta_data($this->_socket);
+        $info = $this->_socketClient->getMetadata();
         $timedout = $info['timed_out'];
         
         if (!$timedout) {
