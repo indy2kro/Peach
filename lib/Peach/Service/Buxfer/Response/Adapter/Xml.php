@@ -25,12 +25,17 @@ class Peach_Service_Buxfer_Response_Adapter_Xml extends Peach_Service_Buxfer_Res
         // get input XML from the body of the request
         $inputXml = $this->_httpResponse->getBody();
         
-        
         // build DOM object
         $dom = new DOMDocument('1.0', 'UTF-8');
         
         // load the input XML
+        Peach_Error_Handler::start();
         $parsed = $dom->loadXML($inputXml);
+        $error = Peach_Error_Handler::stop();
+        
+        if (!is_null($error)) {
+            throw new Peach_Service_Buxfer_Response_Exception('Error parsing the XML string: ' . $error);
+        }
 
         if (!$parsed) {
             throw new Peach_Service_Buxfer_Response_Exception('Error parsing the XML string.');

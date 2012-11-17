@@ -582,13 +582,13 @@ class Peach_Service_Buxfer
         switch ($httpMethod) {
             case Peach_Http_Request::METHOD_GET:
                 foreach ($params as $paramName => $paramValue) {
-                    $httpClient->setParameterGet($paramName, $paramValue);
+                    $httpClient->setQueryParameter($paramName, $paramValue);
                 }
                 break;
                 
             case Peach_Http_Request::METHOD_POST:
                 foreach ($params as $paramName => $paramValue) {
-                    $httpClient->setParameterPost($paramName, $paramValue);
+                    $httpClient->setPostParameter($paramName, $paramValue);
                 }
                 break;
             
@@ -597,16 +597,19 @@ class Peach_Service_Buxfer
                 break;
         }
         
+        // set http method
+        $httpClient->setMethod($httpMethod);
+        
         // perform request
-        $httpResponse = $httpClient->request($httpMethod);
+        $httpResponse = $httpClient->request();
         
         // log request
         $this->_log('HTTP request:', Peach_Log::DEBUG);
-        $this->_log($httpClient->getLastRequest(), Peach_Log::DEBUG);
+        $this->_log($httpClient->getRequest(), Peach_Log::DEBUG);
         
         // log response
         $this->_log('HTTP response:', Peach_Log::DEBUG);
-        $this->_log($httpClient->getLastResponse(), Peach_Log::DEBUG);
+        $this->_log($httpClient->getResponse(), Peach_Log::DEBUG);
         
         // initialize response
         $response = new Peach_Service_Buxfer_Response($httpResponse);
