@@ -57,7 +57,7 @@ class PeachTest_Http_Client_Adapter_Socket_Test extends PeachTest_TestCase
         
         $adapter = new Peach_Http_Client_Adapter_Socket();
         
-        $this->setExpectedException('Peach_Http_Client_Adapter_Exception');
+        $this->setExpectedException('Peach_Socket_Client_Exception');
         $adapter->connect($host, $port);
         $adapter->close();
     }

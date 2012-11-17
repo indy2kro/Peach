@@ -457,6 +457,50 @@ class PeachTest_Socket_Client_Test extends PeachTest_TestCase
         $this->setExpectedException('Peach_Socket_Client_Exception');
         $socketClient->setWriteBuffer(100);
     }
+    
+    public function testEof()
+    {
+        $socketClient = new Peach_Socket_Client();
+        
+        $filename = dirname(__FILE__) . '/_files/test.txt';
+        
+        $socketClient->open($filename);
+        
+        $this->assertFalse($socketClient->eof());
+        $socketClient->getContents();
+        $this->assertTrue($socketClient->eof());
+        
+        $socketClient->close();
+    }
+    
+    public function testEofException()
+    {
+        $socketClient = new Peach_Socket_Client();
+        
+        $this->setExpectedException('Peach_Socket_Client_Exception');
+        $socketClient->eof();
+    }
+    
+    public function testFlush()
+    {
+        $socketClient = new Peach_Socket_Client();
+        
+        $filename = dirname(__FILE__) . '/_files/out.txt';
+        
+        $socketClient->open($filename, 'w');
+        
+        $socketClient->flush();
+        
+        $socketClient->close();
+    }
+    
+    public function testFlushException()
+    {
+        $socketClient = new Peach_Socket_Client();
+        
+        $this->setExpectedException('Peach_Socket_Client_Exception');
+        $socketClient->flush();
+    }
 }
 
 /* EOF */

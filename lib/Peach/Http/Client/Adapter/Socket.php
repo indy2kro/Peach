@@ -52,7 +52,6 @@ class Peach_Http_Client_Adapter_Socket extends Peach_Http_Client_Adapter_Abstrac
      * @param integer $port
      * @param boolean $secure
      * @return void
-     * @throws Peach_Http_Client_Adapter_Exception
      */
     public function connect($host, $port = 80, $secure = false)
     {
@@ -87,6 +86,7 @@ class Peach_Http_Client_Adapter_Socket extends Peach_Http_Client_Adapter_Abstrac
      * @param array          $headers
      * @param string         $body
      * @return string Request as text
+     * @throws Peach_Http_Client_Adapter_Exception
      */
     public function write($method, Peach_Http_Uri $uri, Array $headers = array(), $body = '')
     {

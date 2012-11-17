@@ -348,10 +348,67 @@ class Peach_Socket_Client
     }
     
     /**
+     * Write a string to socket
+     * 
+     * @param string  $string
+     * @param integer $length
+     * @return integer
+     * @throws Peach_Socket_Client_Exception
+     */
+    public function write($string, $length = null)
+    {
+        if (is_null($this->_socket)) {
+            throw new Peach_Socket_Client_Exception('Socket is not connected');
+        }
+        
+        if (!is_null($length)) {
+            $lengthWritten = fwrite($this->_socket, $string, $length);
+        } else {
+            $lengthWritten = fwrite($this->_socket, $string);
+        }
+        
+        if (false === $lengthWritten) {
+            throw new Peach_Socket_Client_Exception('Failed to write to socket');
+        }
+        
+        return $lengthWritten;
+    }
+    
+    /**
+     * Tests for end-of-file
+     * 
+     * @return boolean
+     * @throws Peach_Socket_Client_Exception
+     */
+    public function eof()
+    {
+        if (is_null($this->_socket)) {
+            throw new Peach_Socket_Client_Exception('Socket is not connected');
+        }
+        
+        return feof($this->_socket);
+    }
+    
+    /**
+     * Flushes the output to a file
+     * 
+     * @return boolean
+     * @throws Peach_Socket_Client_Exception
+     */
+    public function flush()
+    {
+        if (is_null($this->_socket)) {
+            throw new Peach_Socket_Client_Exception('Socket is not connected');
+        }
+        
+        return fflush($this->_socket);
+    }
+    
+    /**
      * Gets a line from file pointer including end line delimiter.
      * 
      * @param integer $length
-     * @return string
+     * @return string|false
      * @throws Peach_Socket_Client_Exception
      */
     public function gets($length = null)
