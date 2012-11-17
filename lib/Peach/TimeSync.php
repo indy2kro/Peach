@@ -1,17 +1,17 @@
 <?php
 /**
- * Peach Library tests
+ * Peach Framework
  *
- * @category   PeachTest
- * @package    PeachTest
+ * @category   Peach
+ * @package    Peach_TimeSync
  * @author     Cristi RADU <indy2kro@yahoo.com>
  * @copyright  Copyright (c) 2012 Peach Library
  */
 
 /**
- * Dummy adapter
+ * TimeSync implementation
  */
-class DummyAdapter
+class Peach_TimeSync
 {
 }
 

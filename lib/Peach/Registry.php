@@ -4,6 +4,7 @@
  *
  * @category   Peach
  * @package    Peach_Registry
+ * @author     Cristi RADU <indy2kro@yahoo.com>
  * @copyright  Copyright (c) 2012 Peach Library
  */
 
