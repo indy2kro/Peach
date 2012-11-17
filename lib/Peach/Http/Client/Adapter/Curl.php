@@ -61,11 +61,10 @@ class Peach_Http_Client_Adapter_Curl extends Peach_Http_Client_Adapter_Abstract
      *
      * @param string  $host
      * @param integer $port
-     * @param boolean $secure
      * @return void
      * @throws Peach_Http_Client_Adapter_Exception
      */
-    public function connect($host, $port = 80, $secure = false)
+    public function connect($host, $port = 80)
     {
         if ($this->_connectedHost != $host || $this->_connectedPort != $port) {
             $this->close();

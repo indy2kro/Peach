@@ -209,6 +209,14 @@ class Peach_Http_Request extends Peach_Http_Message
             $this->_options[self::OPT_URI] = new Peach_Http_Uri();
         }
         
+        if (!empty($this->_options[self::OPT_QUERY_PARAMS])) {
+            // add query params to URI
+            $query = http_build_query($this->_options[self::OPT_QUERY_PARAMS]);
+
+            // set query part
+            $this->_options[self::OPT_URI]->setPart(Peach_Http_Uri::PART_QUERY, $query);
+        }
+        
         return $this->_options[self::OPT_URI];
     }
     

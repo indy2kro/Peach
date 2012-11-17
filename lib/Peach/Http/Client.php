@@ -19,6 +19,12 @@ class Peach_Http_Client
     const HTTP_VERSION_11 = '1.1';
     
     /*
+     * Default ports
+     */
+    const PORT_HTTP_DEFAULT = 80;
+    const PORT_HTTPS_DEFAULT = 443;
+    
+    /*
      * Available transfer encodings
      */
     const TRANSFER_ENCODING_CHUNKED = 'chunked';
@@ -265,7 +271,7 @@ class Peach_Http_Client
      * @param Peach_Http_Request $request
      * @returns Peach_Http_Response
      */
-    public function send(Peach_Http_Request $request = null)
+    public function request(Peach_Http_Request $request = null)
     {
         // set request if provided
         if (!is_null($request)) {
@@ -282,14 +288,14 @@ class Peach_Http_Client
         
         // uri
         $uri = clone $this->getUri();
-        
+
         do {
             $response = $this->_doRequest($uri, $request);
 
             if (!$response->isRedirect()) {
                 break;
             }
-            
+
             $uri->setUri($response->getHeader(Peach_Http_Message::HEADER_LOCATION));
             $request->setUri($uri);
             
@@ -311,14 +317,21 @@ class Peach_Http_Client
         $host = $uri->getPart(Peach_Http_Uri::PART_HOST);
         $port = (int)$uri->getPart(Peach_Http_Uri::PART_PORT);
         
+        $secure = ($uri->getPart(Peach_Http_Uri::PART_SCHEME) == Peach_Http_Uri::SCHEME_HTTPS);
+        
         if (empty($port)) {
-            $port = 80;
+            $port = $secure ? self::PORT_HTTPS_DEFAULT : self::PORT_HTTP_DEFAULT;
         }
         
-        $secure = ($uri->getPart(Peach_Http_Uri::PART_SCHEME) == Peach_Http_Uri::SCHEME_HTTPS) ? true : false;
+        // set secure options
+        $secureOptions = array(
+            Peach_Http_Client_Adapter_Abstract::OPT_SSL_ENABLED => $secure
+        );
+
+        $this->_adapter->setOptions($secureOptions);
         
         // connect to the remote host
-        $this->_adapter->connect($host, $port, $secure);
+        $this->_adapter->connect($host, $port);
         
         // prepare body
         $body = $this->_prepareBody($request);
@@ -332,7 +345,7 @@ class Peach_Http_Client
         // write request
         $rawRequest = $this->_adapter->write($method, $uri, $headers, $body);
         $request->setRawRequest($rawRequest);
-        
+
         // read response
         $rawResponse = $this->_adapter->read();
         
@@ -438,7 +451,9 @@ class Peach_Http_Client
             $port = $uri->getPart(Peach_Http_Uri::PART_PORT);
             
             // don't add the port if the value is default one
-            if (!empty($port) && ! ((Peach_Http_Uri::SCHEME_HTTP == $scheme && 80 == $port) || (Peach_Http_Uri::SCHEME_HTTPS == $scheme && 443 == $port))) {
+            if (!empty($port) && !(
+                    (Peach_Http_Uri::SCHEME_HTTP == $scheme && self::PORT_HTTP_DEFAULT == $port)
+                        || (Peach_Http_Uri::SCHEME_HTTPS == $scheme && self::PORT_HTTPS_DEFAULT == $port) )) {
                 $host .= ':' . $port;
             }
             

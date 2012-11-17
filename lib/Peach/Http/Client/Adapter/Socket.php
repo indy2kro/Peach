@@ -12,10 +12,43 @@
  */
 class Peach_Http_Client_Adapter_Socket extends Peach_Http_Client_Adapter_Abstract
 {
-    /**
+    /*
      * Line separator
      */
     const LINE_SEPARATOR = "\r\n";
+    
+    /*
+     * Available options
+     */
+    const OPT_CONTEXT = 'context';
+    const OPT_SSL_CERTIFICATE = 'ssl_certificate';
+    const OPT_SSL_PASSPHRASE = 'ssl_passphrase';
+    const OPT_SSL_VERIFY_PEER = 'ssl_verify_peer';
+    const OPT_SSL_CAPATH = 'ssl_capath';
+    const OPT_SSL_ALLOW_SELF_SIGNED = 'ssl_allow_self_signed';
+    const OPT_SSL_LOCAL_CERT = 'ssl_allow_local_cert';
+    
+    /**
+     * Options
+     * 
+     * @var array
+     */
+    protected $_options = array(
+        self::OPT_PERSISTENT => false,
+        self::OPT_HTTP_VERSION => Peach_Http_Client::HTTP_VERSION_11,
+        self::OPT_TIMEOUT => 10,
+        self::OPT_KEEP_ALIVE => false,
+        self::OPT_BUFFER_SIZE => 8192,
+        self::OPT_CONTEXT => null,
+        self::OPT_SSL_ENABLED => false,
+        self::OPT_SSL_TRANSPORT => self::SSL_CRYPTO_V23,
+        self::OPT_SSL_CERTIFICATE => null,
+        self::OPT_SSL_PASSPHRASE => null,
+        self::OPT_SSL_VERIFY_PEER => false,
+        self::OPT_SSL_CAPATH => null,
+        self::OPT_SSL_ALLOW_SELF_SIGNED => false,
+        self::OPT_SSL_LOCAL_CERT => false
+    );
     
     /**
      * The socket client
@@ -50,10 +83,10 @@ class Peach_Http_Client_Adapter_Socket extends Peach_Http_Client_Adapter_Abstrac
      *
      * @param string  $host
      * @param integer $port
-     * @param boolean $secure
      * @return void
+     * @throws Peach_Http_Client_Adapter_Exception
      */
-    public function connect($host, $port = 80, $secure = false)
+    public function connect($host, $port = 80)
     {
         if ($this->_connectedHost != $host || $this->_connectedPort != $port) {
             $this->close();
@@ -70,14 +103,84 @@ class Peach_Http_Client_Adapter_Socket extends Peach_Http_Client_Adapter_Abstrac
             Peach_Socket_Client::OPT_CONNECT_TIMEOUT => (int) $this->_options[self::OPT_TIMEOUT]
         );
         
-        // connect to socket
+        // build new socket client
         $this->_socketClient = new Peach_Socket_Client($socketOptions);
-        $this->_socketClient->connect($host . ':' . $port);
         
-        $this->_connectedHost = $host;
+        // create new context
+        $context = $this->getStreamContext();
+        
+        if ($this->_options[self::OPT_SSL_ENABLED]) {
+            if ($this->_options[self::OPT_SSL_VERIFY_PEER]) {
+                if (!stream_context_set_option($context, 'ssl', 'verify_peer', $this->_options[self::OPT_SSL_VERIFY_PEER])) {
+                    throw new Peach_Http_Client_Adapter_Exception('Unable to set SSL verify_peer option');
+                }
+            }
+            
+            if (!is_null($this->_options[self::OPT_SSL_CAPATH])) {
+                if (!stream_context_set_option($context, 'ssl', 'capath', $this->_options[self::OPT_SSL_CAPATH])) {
+                    throw new Peach_Http_Client_Adapter_Exception('Unable to set SSL capath option');
+                }
+            }
+            
+            if ($this->_options[self::OPT_SSL_ALLOW_SELF_SIGNED]) {
+                if (!stream_context_set_option($context, 'ssl', 'allow_self_signed', $this->_options[self::OPT_SSL_ALLOW_SELF_SIGNED])) {
+                    throw new Peach_Http_Client_Adapter_Exception('Unable to set SSL allow_self_signed option');
+                }
+            }
+            
+            if (!is_null($this->_options[self::OPT_SSL_CERTIFICATE])) {
+                if (!stream_context_set_option($context, 'ssl', 'local_cert', $this->_options[self::OPT_SSL_CERTIFICATE])) {
+                    throw new Peach_Http_Client_Adapter_Exception('Unable to set SSL local_cert option');
+                }
+            }
+            
+            if (!is_null($this->_options[self::OPT_SSL_PASSPHRASE])) {
+                if (!stream_context_set_option($context, 'ssl', 'passphrase', $this->_options[self::OPT_SSL_PASSPHRASE])) {
+                    throw new Peach_Http_Client_Adapter_Exception('Unable to set SSL passphrase option');
+                }
+            }
+        }
+
+        $connectedHost = 'tcp://' . $host . ':' . $port;
+
+        // connect to socket
+        $this->_socketClient->connect($connectedHost, $context);
+        
+        // check for SSL
+        if ($this->_options[self::OPT_SSL_ENABLED]) {
+            if (!in_array($this->_options[self::OPT_SSL_TRANSPORT], $this->_sslTransportTypes)) {
+                throw new Peach_Http_Client_Adapter_Exception("Invalid SSL transport protocol '" . $this->_options[self::OPT_SSL_TRANSPORT] . "'");
+            }
+            
+            // enable crypto for the socket client
+            $cryptoOptions = array(
+                Peach_Socket_Client::OPT_CRYPTO_ENABLED => true,
+                Peach_Socket_Client::OPT_CRYPTO_TYPE => $this->_options[self::OPT_SSL_TRANSPORT]
+            );
+            $this->_socketClient->setOptions($cryptoOptions);
+            $this->_socketClient->enableCrypto();
+            
+            $connectedHost = $this->_options[self::OPT_SSL_TRANSPORT] . '://' . $host;
+        }
+        
+        $this->_connectedHost = $connectedHost;
         $this->_connectedPort = $port;
     }
 
+    /**
+     * Get stream context
+     * 
+     * @return resource
+     */
+    public function getStreamContext()
+    {
+        if (is_null($this->_options[self::OPT_CONTEXT])) {
+            $this->_options[self::OPT_CONTEXT] = stream_context_create();
+        }
+
+        return $this->_options[self::OPT_CONTEXT];
+    }
+    
     /**
      * Send request to the remote server
      *
@@ -106,6 +209,7 @@ class Peach_Http_Client_Adapter_Socket extends Peach_Http_Client_Adapter_Abstrac
         
         // get query
         $query = $uri->getPart(Peach_Http_Uri::PART_QUERY);
+        
         if (!empty($query)) {
             $path .= '?' . $query;
         }
@@ -254,6 +358,8 @@ class Peach_Http_Client_Adapter_Socket extends Peach_Http_Client_Adapter_Abstrac
         }
         
         $this->_socketClient = null;
+        $this->_context = null;
+        $this->_method = null;
         $this->_connectedHost = null;
         $this->_connectedPort = null;
     }

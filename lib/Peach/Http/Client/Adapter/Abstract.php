@@ -13,6 +13,14 @@
 abstract class Peach_Http_Client_Adapter_Abstract
 {
     /*
+     * SSL types
+     */
+    const SSL_CRYPTO_V23 = STREAM_CRYPTO_METHOD_SSLv23_CLIENT;
+    const SSL_CRYPTO_V2 = STREAM_CRYPTO_METHOD_SSLv2_CLIENT;
+    const SSL_CRYPTO_V3 = STREAM_CRYPTO_METHOD_SSLv3_CLIENT;
+    const SSL_CRYPTO_TLS = STREAM_CRYPTO_METHOD_TLS_CLIENT;
+    
+    /*
      * Available options
      */
     const OPT_PERSISTENT = 'persistent';
@@ -20,6 +28,8 @@ abstract class Peach_Http_Client_Adapter_Abstract
     const OPT_TIMEOUT = 'timeout';
     const OPT_KEEP_ALIVE = 'keep_alive';
     const OPT_BUFFER_SIZE = 'buffer_size';
+    const OPT_SSL_ENABLED = 'ssl_enabled';
+    const OPT_SSL_TRANSPORT = 'ssl_transport';
     
     /**
      * Options
@@ -31,9 +41,21 @@ abstract class Peach_Http_Client_Adapter_Abstract
         self::OPT_HTTP_VERSION => Peach_Http_Client::HTTP_VERSION_11,
         self::OPT_TIMEOUT => 10,
         self::OPT_KEEP_ALIVE => false,
-        self::OPT_BUFFER_SIZE => 8192
+        self::OPT_BUFFER_SIZE => 8192,
+        self::OPT_SSL_ENABLED => false,
+        self::OPT_SSL_TRANSPORT => self::SSL_CRYPTO_V23
     );
     
+    /*
+     * Map SSL transport wrappers to stream crypto method constants
+     *
+     * @var array
+     */
+    protected $_sslTransportTypes = array(
+        self::SSL_CRYPTO_V23, self::SSL_CRYPTO_V2,
+        self::SSL_CRYPTO_V3, self::SSL_CRYPTO_TLS
+    );
+
     /**
      * Constructor
      * 
@@ -75,10 +97,9 @@ abstract class Peach_Http_Client_Adapter_Abstract
      *
      * @param string  $host
      * @param integer $port
-     * @param boolean $secure
      * @return boolean
      */
-    abstract public function connect($host, $port = 80, $secure = false);
+    abstract public function connect($host, $port = 80);
 
     /**
      * Send request to the remote server

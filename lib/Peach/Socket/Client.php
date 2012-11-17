@@ -91,7 +91,6 @@ class Peach_Socket_Client
         if (!is_null($error)) {
             throw new Peach_Socket_Client_Exception('Failed to open ' . $filename);
         }
-        
     }
     
     /**
@@ -121,7 +120,7 @@ class Peach_Socket_Client
         if (is_null($context)) {
             $context = stream_context_create();
         }
-        
+
         Peach_Error_Handler::start();
         $this->_socket = stream_socket_client($socketUrl, $errno, $errstr, (int) $this->_options[self::OPT_CONNECT_TIMEOUT], $flags, $context);
         $error = Peach_Error_Handler::stop();
@@ -205,15 +204,30 @@ class Peach_Socket_Client
         if (is_null($this->_options[self::OPT_CRYPTO_TYPE])) {
             throw new Peach_Socket_Client_Exception('Crypto type must be set in order to enable encryption');
         }
+
         
+        Peach_Error_Handler::start();
         $result = stream_socket_enable_crypto($this->_socket, true, $this->_options[self::OPT_CRYPTO_TYPE]);
-        
-        if (false === $result) {
-            throw new Peach_Socket_Client_Exception('Encryption negotiation failed');
-        }
-        
-        if (0 === $result) {
-            throw new Peach_Socket_Client_Exception('Not enough data to enable encryption, please try again');
+        $error = Peach_Error_Handler::stop();
+
+        if (!$result || $error) {
+            $errorString = '';
+            
+            if (0 === $result) {
+                $errorString .= ': not enough data, please try again';
+            }
+            
+            if ($error) {
+                $errorString .= ': ' . $error->getMessage();
+            }
+            while (($sslError = openssl_error_string()) != false) {
+                $errorString .= '; SSL error: ' . $sslError;
+            }
+            
+            // close socket
+            $this->close();
+            
+            throw new Peach_Socket_Client_Exception('Unable to enable crypto on TCP connection' . $errorString);
         }
     }
     
@@ -229,10 +243,20 @@ class Peach_Socket_Client
             throw new Peach_Socket_Client_Exception('Socket is not connected');
         }
         
+        Peach_Error_Handler::start();
         $result = stream_socket_enable_crypto($this->_socket, false);
-        
-        if (false === $result) {
-            throw new Peach_Socket_Client_Exception('Encryption negotiation failed');
+        $error = Peach_Error_Handler::stop();
+
+        if (!$result || $error) {
+            $errorString = '';
+            while (($sslError = openssl_error_string()) != false) {
+                $errorString .= '; SSL error: ' . $sslError;
+            }
+            
+            // close socket
+            $this->close();
+            
+            throw new Peach_Socket_Client_Exception('Unable to disable crypto on TCP connection' . $errorString);
         }
     }
     
