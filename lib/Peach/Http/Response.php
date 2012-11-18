@@ -14,6 +14,11 @@
 class Peach_Http_Response extends Peach_Http_Message
 {
     /*
+     * Available options
+     */
+    const OPT_DECODE_CHUNKED = 'decode_chunked';
+    
+    /*
      * Available parts
      */
     const PART_HTTP_VERSION = 'http_version';
@@ -31,6 +36,15 @@ class Peach_Http_Response extends Peach_Http_Message
         self::PART_STATUS_STRING => null,
         self::PART_HEADERS => array(),
         self::PART_BODY => null
+    );
+    
+    /**
+     * Options
+     * 
+     * @var array
+     */
+    protected $_options = array(
+        self::OPT_DECODE_CHUNKED => true
     );
     
     /**
@@ -339,6 +353,11 @@ class Peach_Http_Response extends Peach_Http_Message
      */
     protected function _decodeChunkedBody($body)
     {
+        // some adapters decode chunked parts automatically, no need to do it again
+        if (!$this->_options[self::OPT_DECODE_CHUNKED]) {
+            return $body;
+        }
+        
         $decBody = '';
 
         while (trim($body)) {

@@ -212,7 +212,20 @@ class Peach_Http_Client
     }
 
     /**
-     * Set the POST parameters
+     * Set array of GET parameters
+     *
+     * @param array $params
+     * @return void
+     */
+    public function setQueryParameters(Array $params = array())
+    {
+        foreach ($params as $paramName => $paramValue) {
+            $this->setQueryParameter($paramName, $paramValue);
+        }
+    }
+    
+    /**
+     * Set POST parameter
      *
      * @param array $post
      * @return Client
@@ -220,6 +233,19 @@ class Peach_Http_Client
     public function setPostParameter($name, $value = null)
     {
         $this->getRequest()->setPostParameter($name, $value);
+    }
+    
+    /**
+     * Set array of POST parameters
+     *
+     * @param array $params
+     * @return void
+     */
+    public function setPostParameters(Array $params = array())
+    {
+        foreach ($params as $paramName => $paramValue) {
+            $this->setPostParameter($paramName, $paramValue);
+        }
     }
     
     /**
@@ -350,8 +376,16 @@ class Peach_Http_Client
         // read response
         $rawResponse = $this->_adapter->read();
         
+        // build response options
+        $responseOptions = array();
+        
+        // cURL automatically decodes chunked-messages, disable automatic chunked decoding in response
+        if ($this->_adapter instanceof Peach_Http_Client_Adapter_Curl) {
+            $responseOptions[Peach_Http_Response::OPT_DECODE_CHUNKED] = false;
+        }
+        
         // build response object
-        $this->_response = new Peach_Http_Response();
+        $this->_response = new Peach_Http_Response(array(), $responseOptions);
         $this->_response->setRawResponse($rawResponse);
         
         return $this->_response;
