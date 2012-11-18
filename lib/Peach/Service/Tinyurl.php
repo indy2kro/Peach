@@ -3,7 +3,7 @@
  * Peach Framework
  *
  * @category   Peach
- * @package    Peach_Service_SemRush
+ * @package    Peach_Service_Tinyurl
  * @author     Cristi RADU <indy2kro@yahoo.com>
  * @copyright  Copyright (c) 2012 Peach Library
  * @see        http://tinyurl.com/
@@ -108,10 +108,9 @@ class Peach_Service_Tinyurl
     }
     
     /**
-     * Perform a generic request
+     * Create a tiny URL
      * 
      * @param string $url
-     * @param array  $params
      * @return array
      */
     public function create($url)
@@ -135,7 +134,7 @@ class Peach_Service_Tinyurl
         // perform request
         $response = $this->_httpClient->request();
         
-        // format the response
+        // response is the tiny url
         return $response->getBody();
     }
 }
