@@ -18,6 +18,12 @@ Build status
 
 [![Build Status](https://buildhive.cloudbees.com/job/indy2kro/job/Peach/badge/icon)](https://buildhive.cloudbees.com/job/indy2kro/job/Peach/)
 
+Coding Style Guide
+=====
+
+[PSR-2 Style Guide] (https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-2-coding-style-guide.md) must be followed
+by all the classes in the library.
+
 License
 =====
 
