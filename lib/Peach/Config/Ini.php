@@ -43,8 +43,8 @@ class Peach_Config_Ini extends Peach_Config
      */
     public function __construct($filename = null, $section = null, Array $options = array())
     {
-        // set options
-        $this->setOptions($options);
+        // run parent constructor
+        parent::__construct(array(), $options);
 
         if (!is_null($filename)) {
             $this->loadFile($filename, $section);
@@ -110,7 +110,7 @@ class Peach_Config_Ini extends Peach_Config
                     $dataArray[$sectionName] = $this->_processSection($iniArray, $sectionName);
                 }
             }
-            $this->loadArray($dataArray);
+            $this->_loadArray($dataArray);
         } else {
             // Load one or more sections
             if (!is_array($section)) {
@@ -124,7 +124,7 @@ class Peach_Config_Ini extends Peach_Config
                 $dataArray = $this->_arrayMergeRecursive($this->_processSection($iniArray, $sectionName), $dataArray);
 
             }
-            $this->loadArray($dataArray);
+            $this->_loadArray($dataArray);
         }
     }
     

@@ -147,18 +147,7 @@ class PeachTest_Config_Test extends PeachTest_TestCase
         
         $this->assertEquals(4, $count);
     }
-    
-    public function testIterator()
-    {
-        foreach ($this->_config as $item) {
-            $currentItem = $this->_config->current();
-            $currentKey = $this->_config->key();
-            
-            $this->assertNotNull($currentItem);
-            $this->assertNotNull($currentKey);
-        }
-    }
-    
+
     public function testExtends()
     {
         $extends = $this->_config->getExtends();

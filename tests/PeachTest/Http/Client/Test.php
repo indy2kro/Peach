@@ -129,7 +129,7 @@ class PeachTest_Http_Client_Test extends PeachTest_TestCase
     
     public function testRequestWithRedirect()
     {
-        $uri = 'http://google.com';
+        $uri = 'http://yahoo.com';
         
         $client = new Peach_Http_Client($uri);
         $response = $client->request();
@@ -164,7 +164,7 @@ class PeachTest_Http_Client_Test extends PeachTest_TestCase
     
     public function testSendTrace()
     {
-        $uri = 'http://google.com/';
+        $uri = 'http://yahoo.com/';
         
         $client = new Peach_Http_Client($uri);
         $client->setMethod(Peach_Http_Request::METHOD_TRACE);

@@ -11,7 +11,7 @@
 /**
  * Config implementation
  */
-class Peach_Config implements Countable, Iterator
+class Peach_Config extends ArrayObject
 {
     /*
      * Available options
@@ -30,36 +30,6 @@ class Peach_Config implements Countable, Iterator
     );
 
     /**
-     * Contains array of configuration data
-     *
-     * @var array
-     */
-    protected $_data = array();
-    
-    /**
-     * Counter
-     * 
-     * @var integer
-     */
-    protected $_count = 0;
-    
-    /**
-     * Current index
-     * 
-     * @var integer
-     */
-    protected $_index = 0;
-    
-    /**
-     * Load file error string.
-     *
-     * Is null if there was no error while file loading
-     *
-     * @var string
-     */
-    protected $_loadErrorStr = null;
-    
-    /**
      * This is used to track section inheritance. The keys are names of sections that
      * extend other sections, and the values are the extended sections.
      *
@@ -67,6 +37,12 @@ class Peach_Config implements Countable, Iterator
      */
     protected $_extends = array();
 
+    /**
+     * Load file error string.
+     *
+     * @var string
+     */
+    protected $_loadErrorStr;
     /**
      * Constructor
      * 
@@ -79,94 +55,15 @@ class Peach_Config implements Countable, Iterator
         // set options
         $this->setOptions($options);
         
-        // load array
-        $this->loadArray($array);
+        foreach ($array as $key => &$value) {
+            if (is_array($value)) {
+                $value = new static($value, $options);
+            }
+        }
+        
+        parent::__construct($array, ArrayObject::ARRAY_AS_PROPS);
     }
     
-    /**
-     * Deep clone of this instance to ensure that nested Peach_Config objects are also cloned
-     *
-     * @return void
-     */
-    public function __clone()
-    {
-      $array = array();
-      
-      foreach ($this->_data as $key => $value) {
-          if ($value instanceof Peach_Config) {
-              $array[$key] = clone $value;
-          } else {
-              $array[$key] = $value;
-          }
-      }
-      
-      $this->_data = $array;
-    }
-
-    /**
-     * Support isset() overloading
-     *
-     * @param string $name
-     * @return boolean
-     */
-    public function __isset($name)
-    {
-        return isset($this->_data[$name]);
-    }
-
-    /**
-     * Support unset() overloading
-     *
-     * @param string $name
-     * @throws Peach_Config_Exception
-     * @return void
-     */
-    public function __unset($name)
-    {
-        if ($this->_options[self::OPT_READ_ONLY]) {
-            throw new Peach_Config_Exception('Config object is read only');
-        }
-        
-        unset($this->_data[$name]);
-        $this->_count = count($this->_data);
-    }
-
-    /**
-     * Magic function so that $obj->value will work.
-     *
-     * @param string $name
-     * @return mixed
-     */
-    public function __get($name)
-    {
-        return $this->get($name);
-    }
-
-    /**
-     * Only allow setting of a property if $allowModifications
-     * was set to true on construction. Otherwise, throw an exception.
-     *
-     * @param  string $name
-     * @param  mixed  $value
-     * @throws Peach_Config_Exception
-     * @return void
-     */
-    public function __set($name, $value)
-    {
-        if ($this->_options[self::OPT_READ_ONLY]) {
-            throw new Peach_Config_Exception('Config object is read only');
-        }
-        
-        if (is_array($value)) {
-            $this->_data[$name] = new self($value, $this->_options);
-        } else {
-            $this->_data[$name] = $value;
-        }
-        
-        // update counter
-        $this->_count = count($this->_data);
-    }
-
     /**
      * Set options array
      * 
@@ -179,24 +76,62 @@ class Peach_Config implements Countable, Iterator
     }
     
     /**
-     * Load array
+     * Get an offset
      * 
-     * @param array $array
-     * @return void
+     * @param string $offset
+     * @return mixed
+     * @throws Peach_Config_Exception
      */
-    public function loadArray(Array $array)
+    public function offsetGet($offset)
     {
-        $this->_data = array();
-        foreach ($array as $key => $value) {
-            if (is_array($value)) {
-                $this->_data[$key] = new self($value, $this->_options);
-            } else {
-                $this->_data[$key] = $value;
-            }
+        if (!$this->offsetExists($offset)) {
+            throw new Peach_Config_Exception("Index '" . $offset . "' not found in config object");
         }
-        $this->_count = count($this->_data);
+        
+        return parent::offsetGet($offset);
     }
-
+    
+    /**
+     * Set an offset
+     * 
+     * @param string $offset
+     * @param mixed $value
+     * @return void
+     * @throws Peach_Config_Exception
+     */
+    public function offsetSet($offset, $value)
+    {
+        if ($this->_options[self::OPT_READ_ONLY]) {
+            throw new Peach_Config_Exception('Config object is read only');
+        }
+        
+        if (is_array($value)) {
+            $value = new self($value, $this->_options);
+        }
+        
+        parent::offsetSet($offset, $value);
+    }
+    
+    /**
+     * Unset offset
+     * 
+     * @param string $offset
+     * @return void
+     * @throws Peach_Config_Exception
+     */
+    public function offsetUnset($offset)
+    {
+        if ($this->_options[self::OPT_READ_ONLY]) {
+            throw new Peach_Config_Exception('Config object is read only');
+        }
+        
+        if (!$this->offsetExists($offset)) {
+            throw new Peach_Config_Exception("Index '" . $offset . "' not found in config object");
+        }
+        
+        parent::offsetUnset($offset);
+    }
+    
     /**
      * Retrieve a value
      *
@@ -205,28 +140,26 @@ class Peach_Config implements Countable, Iterator
      */
     public function get($name)
     {
-        if (!array_key_exists($name, $this->_data)) {
-            throw new Peach_Config_Exception("Index '" . $name . "' not found in config object");
-        }
-        return $this->_data[$name];
+        return $this->offsetGet($name);
     }
-
+    
     /**
-     * Retrieve a value and return $default if there is no element set.
+     * Retrieve a value
      *
      * @param string $name
-     * @param mixed  $default
      * @return mixed
      */
     public function getSafe($name, $default = null)
     {
         $result = $default;
-        if (array_key_exists($name, $this->_data)) {
-            $result = $this->_data[$name];
+        
+        if ($this->offsetExists($name)) {
+            $result = parent::offsetGet($name);
         }
+        
         return $result;
     }
-
+    
     /**
      * Get options array
      * 
@@ -244,78 +177,15 @@ class Peach_Config implements Countable, Iterator
      */
     public function toArray()
     {
-        $array = array();
-        $data = $this->_data;
-        
-        foreach ($data as $key => $value) {
-            if ($value instanceof Peach_Config) {
-                $array[$key] = $value->toArray();
-            } else {
-                $array[$key] = $value;
+        $array = (array)$this;
+
+        foreach ($array as &$value) {
+            if ($value instanceof self) {
+                $value = $value->toArray();
             }
         }
         
         return $array;
-    }
-    
-    /**
-     * Defined by Countable interface
-     *
-     * @return int
-     */
-    public function count()
-    {
-        return $this->_count;
-    }
-
-    /**
-     * Defined by Iterator interface
-     *
-     * @return mixed
-     */
-    public function current()
-    {
-        return current($this->_data);
-    }
-
-    /**
-     * Defined by Iterator interface
-     *
-     * @return mixed
-     */
-    public function key()
-    {
-        return key($this->_data);
-    }
-
-    /**
-     * Defined by Iterator interface
-     *
-     */
-    public function next()
-    {
-        next($this->_data);
-        $this->_index++;
-    }
-
-    /**
-     * Defined by Iterator interface
-     *
-     */
-    public function rewind()
-    {
-        reset($this->_data);
-        $this->_index = 0;
-    }
-
-    /**
-     * Defined by Iterator interface
-     *
-     * @return boolean
-     */
-    public function valid()
-    {
-        return $this->_index < $this->_count;
     }
     
     /**
@@ -343,7 +213,24 @@ class Peach_Config implements Countable, Iterator
             $this->_extends[$extendingSection] = $extendedSection;
         }
     }
-
+    
+    /**
+     * Load array
+     * 
+     * @param array $array
+     * @return void
+     */
+    protected function _loadArray(Array $array)
+    {
+        foreach ($array as $key => &$value) {
+            if (is_array($value)) {
+                $value = new self($value, $this->_options);
+            }
+        }
+        
+        $this->exchangeArray($array);
+    }
+    
     /**
      * Handle any errors from simplexml_load_file, parse_ini_file, parse_ini_string
      *

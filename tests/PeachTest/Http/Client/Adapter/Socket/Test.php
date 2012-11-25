@@ -15,7 +15,7 @@ class PeachTest_Http_Client_Adapter_Socket_Test extends PeachTest_TestCase
 {
     public function testConnect()
     {
-        $host = 'google.com';
+        $host = 'yahoo.com';
         $port = 80;
         
         $adapter = new Peach_Http_Client_Adapter_Socket();
@@ -25,7 +25,7 @@ class PeachTest_Http_Client_Adapter_Socket_Test extends PeachTest_TestCase
     
     public function testConnectPersistent()
     {
-        $host = 'google.com';
+        $host = 'yahoo.com';
         $port = 80;
         
         $options = array(
@@ -39,7 +39,7 @@ class PeachTest_Http_Client_Adapter_Socket_Test extends PeachTest_TestCase
     
     public function testAlreadyConnected()
     {
-        $host = 'google.com';
+        $host = 'yahoo.com';
         $port = 80;
         
         $adapter = new Peach_Http_Client_Adapter_Socket();
@@ -66,7 +66,7 @@ class PeachTest_Http_Client_Adapter_Socket_Test extends PeachTest_TestCase
     public function testWrite()
     {
         $method = 'GET';
-        $uri = new Peach_Http_Uri('http://www.google.com');
+        $uri = new Peach_Http_Uri('http://www.yahoo.com');
         $host = $uri->getPart(Peach_Http_Uri::PART_HOST);
         $port = 80;
         

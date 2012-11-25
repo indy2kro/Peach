@@ -29,7 +29,7 @@ class PeachTest_Socket_Client_Test extends PeachTest_TestCase
     {
         $socketClient = new Peach_Socket_Client();
         
-        $socketUrl = 'tcp://www.google.com:80';
+        $socketUrl = 'tcp://www.yahoo.com:80';
         
         $socketClient->connect($socketUrl);
         $socketClient->close();
@@ -43,7 +43,7 @@ class PeachTest_Socket_Client_Test extends PeachTest_TestCase
         
         $socketClient = new Peach_Socket_Client($options);
         
-        $socketUrl = 'tcp://www.google.com:80';
+        $socketUrl = 'tcp://www.yahoo.com:80';
         
         $socketClient->connect($socketUrl);
         $socketClient->close();
@@ -57,7 +57,7 @@ class PeachTest_Socket_Client_Test extends PeachTest_TestCase
         
         $socketClient = new Peach_Socket_Client($options);
         
-        $socketUrl = 'tcp://www.google.com:80';
+        $socketUrl = 'tcp://www.yahoo.com:80';
         
         $socketClient->connect($socketUrl);
         $socketClient->close();
@@ -99,7 +99,7 @@ class PeachTest_Socket_Client_Test extends PeachTest_TestCase
     {
         $socketClient = new Peach_Socket_Client();
         
-        $socketUrl = 'wrong://www.google.com:80';
+        $socketUrl = 'wrong://www.yahoo.com:80';
         
         $this->setExpectedException('Peach_Socket_Client_Exception');
         $socketClient->connect($socketUrl);
@@ -131,7 +131,7 @@ class PeachTest_Socket_Client_Test extends PeachTest_TestCase
     {
         $socketClient = new Peach_Socket_Client();
         
-        $socketUrl = 'tcp://www.google.com:80';
+        $socketUrl = 'tcp://www.yahoo.com:80';
         
         $socketClient->connect($socketUrl);
         $socketClient->setTimeout(10);
@@ -152,7 +152,7 @@ class PeachTest_Socket_Client_Test extends PeachTest_TestCase
     {
         $socketClient = new Peach_Socket_Client();
         
-        $socketUrl = 'tcp://www.google.com:80';
+        $socketUrl = 'tcp://www.yahoo.com:80';
         
         $socketClient->connect($socketUrl);
         $socket = $socketClient->getSocket();
@@ -174,7 +174,7 @@ class PeachTest_Socket_Client_Test extends PeachTest_TestCase
     {
         $socketClient = new Peach_Socket_Client();
         
-        $socketUrl = 'tcp://www.google.com:80';
+        $socketUrl = 'tcp://www.yahoo.com:80';
         
         $socketClient->connect($socketUrl);
         
@@ -380,7 +380,7 @@ class PeachTest_Socket_Client_Test extends PeachTest_TestCase
     {
         $socketClient = new Peach_Socket_Client();
         
-        $socketUrl = 'tcp://www.google.com:80';
+        $socketUrl = 'tcp://www.yahoo.com:80';
         
         $socketClient->connect($socketUrl);
         
