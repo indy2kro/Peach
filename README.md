@@ -8,10 +8,7 @@ Development Status
 
 Current modules under development:
 
- * Db
- * Http_Client
- * Socket_Client
- * TimeSync
+ * Cache
 
 Build status
 =====
