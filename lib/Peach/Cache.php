@@ -32,9 +32,9 @@ class Peach_Cache
      */
     const OPT_ENABLED = 'enabled';
     const OPT_AUTOMATIC_SERIALIZATION = 'automatic_serialization';
-    const OPT_LOGGER = 'logger';
     const OPT_IGNORE_USER_ABORT = 'ignore_user_abort';
     const OPT_CACHE_PREFIX = 'cache_prefix';
+    const OPT_FILTERS = 'filters';
     
     /**
      * Options
@@ -44,9 +44,9 @@ class Peach_Cache
     protected $_options = array(
         self::OPT_ENABLED => true,
         self::OPT_AUTOMATIC_SERIALIZATION => false,
-        self::OPT_LOGGER => null,
         self::OPT_IGNORE_USER_ABORT => false,
-        self::OPT_CACHE_PREFIX => ''
+        self::OPT_CACHE_PREFIX => '',
+        self::OPT_FILTERS => array()
     );
     
     /**
@@ -101,6 +101,37 @@ class Peach_Cache
     }
     
     /**
+     * Add filter
+     * 
+     * @return void
+     */
+    public function addFilter(Peach_Cache_Filter_Abstract $filter)
+    {
+        $this->_options[self::OPT_FILTERS][] = $filter;
+    }
+    
+    /**
+     * Set filters
+     * 
+     * @param array $filters
+     * @return void
+     */
+    public function setFilters(Array $filters)
+    {
+        $this->_options[self::OPT_FILTERS] = $filters;
+    }
+    
+    /**
+     * Get filters
+     * 
+     * @return array
+     */
+    public function getFilters()
+    {
+        return $this->_options[self::OPT_FILTERS];
+    }
+    
+    /**
      * Test if a cache is available for the given id and (if yes) return it (false else)
      *
      * @param string             $id                Cache id
@@ -132,6 +163,9 @@ class Peach_Cache
             // no cache available
             return false;
         }
+        
+        // apply output filters
+        $data = $this->_applyOutputFilters($data);
         
         // unserialize the data if needed
         if ($this->_options[self::OPT_AUTOMATIC_SERIALIZATION]) {
@@ -201,18 +235,14 @@ class Peach_Cache
                 
         if ($this->_options[self::OPT_AUTOMATIC_SERIALIZATION]) {
             $data = serialize($data);
-        } else {
-            if (!is_string($data)) {
-                // restore original options
-                $this->_options = $originalOptions;
-
-                throw new Peach_Cache_Exception('Data must be provided as string or set automatic_serialization = true');
-            }
         }
         
         if ($this->_options[self::OPT_IGNORE_USER_ABORT]) {
             $abort = ignore_user_abort(true);
         }
+        
+        // apply input filters
+        $data = $this->_applyInputFilters($data);
         
         // save to adapter
         $result = $this->_adapter->save($data, $id, $tags);
@@ -270,6 +300,37 @@ class Peach_Cache
         return $prefix . $id;
     }
 
+    /**
+     * Apply input filters
+     * 
+     * @param mixed $input
+     * @return string
+     */
+    protected function _applyInputFilters($input)
+    {
+        foreach ($this->_options[self::OPT_FILTERS] as $filter) {
+            $input = $filter->filterInput($input);
+        }
+        
+        return $input;
+    }
+    
+    /**
+     * Apply output filters
+     * 
+     * @param string $output
+     * @return mixed
+     */
+    protected function _applyOutputFilters($output)
+    {
+        $filters = array_reverse($this->_options[self::OPT_FILTERS]);
+        
+        foreach ($filters as $filter) {
+            $output = $filter->filterOutput($output);
+        }
+        
+        return $output;
+    }
 }
 
 /* EOF */
