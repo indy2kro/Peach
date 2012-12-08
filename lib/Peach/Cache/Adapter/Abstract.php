@@ -1,6 +1,6 @@
 <?php
 /**
- * Peach Framework
+ * Peach Library
  *
  * @category   Peach
  * @package    Peach_Cache
@@ -9,9 +9,9 @@
  */
 
 /**
- * Cache abstract backend
+ * Cache abstract adapter
  */
-abstract class Peach_Cache_Backend_Abstract
+abstract class Peach_Cache_Adapter_Abstract
 {
     /*
      * Available options
@@ -57,7 +57,7 @@ abstract class Peach_Cache_Backend_Abstract
     /**
      * Test if a cache is available for the given id and (if yes) return it (false else)
      *
-     * Note : return value is always "string" (unserialization is done by the core not by the backend)
+     * Note : return value is always "string" (unserialization is done by the core not by the adapter)
      *
      * @param  string  $id Cache id
      * @return string|false cached datas

@@ -109,8 +109,8 @@ class PeachTest_Http_Uri_Test extends PeachTest_TestCase
             
             if (!is_null($previousMemoryUsed) && $memoryUsed > $previousMemoryUsed) {
                 $this->fail('Memory leak detected! Current memory usage: '
-                        . $this->_friendlySize($memoryUsed) . ', previous: '
-                        . $this->_friendlySize($previousMemoryUsed));
+                        . $memoryUsed . ' (' . $this->_friendlySize($memoryUsed) . ')' . ', previous: '
+                        . $previousMemoryUsed . ' (' . $this->_friendlySize($previousMemoryUsed) . ')');
             }
         }
     }

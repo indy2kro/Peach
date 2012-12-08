@@ -1,6 +1,6 @@
 <?php
 /**
- * Peach Framework
+ * Peach Library
  *
  * @category   Peach
  * @package    Peach_Cache
@@ -9,9 +9,9 @@
  */
 
 /**
- * Cache file backend
+ * Cache file adapter
  */
-class Peach_Cache_Backend_File extends Peach_Cache_Backend_Abstract
+class Peach_Cache_Adapter_File extends Peach_Cache_Adapter_Abstract
 {
 }
 

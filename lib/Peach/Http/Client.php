@@ -1,6 +1,6 @@
 <?php
 /**
- * Peach Framework
+ * Peach Library
  *
  * @category   Peach
  * @package    Peach_Http

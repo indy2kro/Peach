@@ -1,6 +1,6 @@
 <?php
 /**
- * Peach Framework
+ * Peach Library
  *
  * @category   Peach
  * @package    Peach_Cache
@@ -14,18 +14,18 @@
 class Peach_Cache
 {
     /*
-     * Available backends
+     * Available adapters
      */
-    const BACKEND_FILE = 'file';
+    const ADAPTER_FILE = 'file';
     
     /*
      * Cleaning modes
      */
     const CLEANING_MODE_ALL              = 'all';
     const CLEANING_MODE_OLD              = 'old';
-    const CLEANING_MODE_MATCHING_TAG     = 'matchingTag';
-    const CLEANING_MODE_NOT_MATCHING_TAG = 'notMatchingTag';
-    const CLEANING_MODE_MATCHING_ANY_TAG = 'matchingAnyTag';
+    const CLEANING_MODE_MATCHING_TAG     = 'matching_tag';
+    const CLEANING_MODE_NOT_MATCHING_TAG = 'not_matching_tag';
+    const CLEANING_MODE_MATCHING_ANY_TAG = 'matching_any_tag';
 
     /*
      * Available options
@@ -50,28 +50,28 @@ class Peach_Cache
     );
     
     /**
-     * Backend for caching
+     * Adapter for caching
      * 
-     * @var Peach_Cache_Backend_Abstract
+     * @var Peach_Cache_Adapter_Abstract
      */
-    protected $_backend;
+    protected $_adapter;
     
     /**
      * Constructor
      * 
-     * @param string             $backend
+     * @param string             $adapter
      * @param array|Peach_Config $options
-     * @param array|Peach_Config $backendOptions
+     * @param array|Peach_Config $adapterOptions
      * @return void
      */
-    public function __construct($backend = self::BACKEND_FILE, $options = array(), $backendOptions = array())
+    public function __construct($adapter = self::ADAPTER_FILE, $options = array(), $adapterOptions = array())
     {
         // set options
         $this->setOptions($options);
         
-        // build backend object
-        $backendClassName = 'Peach_Cache_Backend_' . ucfirst($backend);
-        $this->_backend = new $backendClassName($backendOptions);
+        // build adapter object
+        $adapterClassName = 'Peach_Cache_Adapter_' . ucfirst($adapter);
+        $this->_adapter = new $adapterClassName($adapterOptions);
     }
     
     /**
@@ -91,13 +91,13 @@ class Peach_Cache
     }
     
     /**
-     * Get backend
+     * Get adapter
      * 
-     * @return Peach_Cache_Backend_Abstract
+     * @return Peach_Cache_Adapter_Abstract
      */
-    public function getBackend()
+    public function getAdapter()
     {
-        return $this->_backend;
+        return $this->_adapter;
     }
     
     /**
@@ -123,7 +123,7 @@ class Peach_Cache
         $id = $this->_formatId($id);
         
         // load data
-        $data = $this->_backend->load($id);
+        $data = $this->_adapter->load($id);
         
         if (false === $data) {
             // restore original options
@@ -166,7 +166,7 @@ class Peach_Cache
         // format id
         $id = $this->_formatId($id);
         
-        $result = $this->_backend->test($id);
+        $result = $this->_adapter->test($id);
         
         // restore original options
         $this->_options = $originalOptions;
@@ -214,8 +214,8 @@ class Peach_Cache
             $abort = ignore_user_abort(true);
         }
         
-        // save to backend
-        $result = $this->_backend->save($data, $id, $tags);
+        // save to adapter
+        $result = $this->_adapter->save($data, $id, $tags);
         
         if ($this->_options[self::OPT_IGNORE_USER_ABORT]) {
             ignore_user_abort($abort);
@@ -249,8 +249,8 @@ class Peach_Cache
         // format id
         $id = $this->_formatId($id);
                 
-        // save to backend
-        $result = $this->_backend->remove($id);
+        // save to adapter
+        $result = $this->_adapter->remove($id);
         
         // restore original options
         $this->_options = $originalOptions;
