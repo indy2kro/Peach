@@ -85,9 +85,9 @@ class PeachTest_Cache_Test extends PeachTest_TestCase
         $data = 'Testing. This should match the cache.';
         $id = 'cache-id';
         
-        $cache->save($data, $id);
+        $this->assertTrue($cache->save($data, $id));
         $this->assertEquals($data, $cache->load($id));
-        $cache->remove($id);
+        $this->assertTrue($cache->remove($id));
     }
     
     public function testLoadNotEnabled()
@@ -105,9 +105,9 @@ class PeachTest_Cache_Test extends PeachTest_TestCase
         $data = 'Testing. This should match the cache.';
         $id = 'cache-id';
         
-        $cache->save($data, $id);
+        $this->assertTrue($cache->save($data, $id));
         $this->assertFalse($cache->load($id));
-        $cache->remove($id);
+        $this->assertTrue($cache->remove($id));
     }
     
     public function testLoadNotInCache()
@@ -143,9 +143,9 @@ class PeachTest_Cache_Test extends PeachTest_TestCase
         
         $cache = new Peach_Cache(Peach_Cache::ADAPTER_FILE, $options, $adapterOptions);
         
-        $cache->save($data, $id);
+        $this->assertTrue($cache->save($data, $id));
         $this->assertEquals($data, $cache->load($id));
-        $cache->remove($id);
+        $this->assertTrue($cache->remove($id));
     }
     
     public function testMemoryLeakSave()
@@ -169,7 +169,7 @@ class PeachTest_Cache_Test extends PeachTest_TestCase
         $previousMemoryUsed = null;
         
         for ($counter = 0; $counter < $iterations; $counter++) {
-            $cache->save($data, $id);
+            $this->assertTrue($cache->save($data, $id));
             
             $previousMemoryUsed = $memoryUsed;
             $memoryUsed = memory_get_usage();
@@ -181,7 +181,7 @@ class PeachTest_Cache_Test extends PeachTest_TestCase
             }
         }
         
-        $cache->remove($id);
+        $this->assertTrue($cache->remove($id));
     }
     
     public function testMemoryLeakLoad()
@@ -197,7 +197,7 @@ class PeachTest_Cache_Test extends PeachTest_TestCase
         $id = 'cache-id-load';
         
         $cache = new Peach_Cache(Peach_Cache::ADAPTER_FILE, $options, $adapterOptions);
-        $cache->save($data, $id);
+        $this->assertTrue($cache->save($data, $id));
         
         $iterations = 10;
         
@@ -218,7 +218,7 @@ class PeachTest_Cache_Test extends PeachTest_TestCase
             }
         }
         
-        $cache->remove($id);
+        $this->assertTrue($cache->remove($id));
     }
     
     public function testTest()
@@ -237,9 +237,9 @@ class PeachTest_Cache_Test extends PeachTest_TestCase
         $id = 'cache-id';
         
         $this->assertFalse($cache->test($id));
-        $cache->save($data, $id);
+        $this->assertTrue($cache->save($data, $id));
         $this->assertTrue($cache->test($id));
-        $cache->remove($id);
+        $this->assertTrue($cache->remove($id));
     }
     
     public function testTestNotEnabled()
@@ -258,9 +258,9 @@ class PeachTest_Cache_Test extends PeachTest_TestCase
         $id = 'cache-id';
         
         $this->assertFalse($cache->test($id));
-        $cache->save($data, $id);
+        $this->assertTrue($cache->save($data, $id));
         $this->assertFalse($cache->test($id));
-        $cache->remove($id);
+        $this->assertTrue($cache->remove($id));
     }
     
     public function testSaveIgnoreUserAbort()
@@ -279,8 +279,8 @@ class PeachTest_Cache_Test extends PeachTest_TestCase
         $data = 'Testing. This should match the cache.';
         $id = 'cache-id';
         
-        $cache->save($data, $id);
-        $cache->remove($id);
+        $this->assertTrue($cache->save($data, $id));
+        $this->assertTrue($cache->remove($id));
     }
     
     public function testFilters()
@@ -305,9 +305,55 @@ class PeachTest_Cache_Test extends PeachTest_TestCase
         $data = 'Testing. This should match the cache.';
         $id = 'cache-id';
         
-        $cache->save($data, $id);
+        $this->assertTrue($cache->save($data, $id));
         $this->assertEquals($data, $cache->load($id));
-        $cache->remove($id);
+        $this->assertTrue($cache->remove($id));
+    }
+    
+    public function testTouch()
+    {
+        $options = array(
+            Peach_Cache::OPT_ENABLED => true
+        );
+        
+        $timestamp = time();
+        $lifetime = 100;
+        
+        $adapterOptions = array(
+            Peach_Cache_Adapter_File::OPT_CACHE_DIR => dirname(__FILE__) . '/_files/',
+            Peach_Cache_Adapter_File::OPT_LIFETIME => $lifetime
+        );
+        
+        $cache = new Peach_Cache(Peach_Cache::ADAPTER_FILE, $options, $adapterOptions);
+        
+        $data = 'Testing. This should match the cache.';
+        $id = 'cache-id';
+        
+        $this->assertTrue($cache->save($data, $id));
+        $this->assertTrue($cache->test($id));
+        $this->assertTrue($cache->touch($id, ($timestamp - $lifetime - 1)));
+        $this->assertFalse($cache->test($id));
+        $this->assertTrue($cache->touch($id));
+        $this->assertTrue($cache->test($id));
+        $this->assertTrue($cache->remove($id));
+    }
+    
+    public function testTouchNotEnabled()
+    {
+        $options = array(
+            Peach_Cache::OPT_ENABLED => false
+        );
+        
+        $adapterOptions = array(
+            Peach_Cache_Adapter_File::OPT_CACHE_DIR => dirname(__FILE__) . '/_files/'
+        );
+        
+        $cache = new Peach_Cache(Peach_Cache::ADAPTER_FILE, $options, $adapterOptions);
+        
+        $id = 'cache-id';
+        
+        $this->assertTrue($cache->touch($id));
+        $this->assertTrue($cache->remove($id));
     }
 }
 

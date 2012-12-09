@@ -107,7 +107,7 @@ class Peach_Cache_Adapter_File extends Peach_Cache_Adapter_Abstract
      * Remove a cache record
      *
      * @param string $id Cache id
-     * @return boolean True if no problem
+     * @return void
      */
     public function remove($id)
     {
@@ -116,6 +116,26 @@ class Peach_Cache_Adapter_File extends Peach_Cache_Adapter_Abstract
         
         // remove cache file
         $this->_remove($cachePath);
+    }
+
+    /**
+     * Touch the timestamp of a cache item. If no timestamp is provided, the current timestamp is used
+     *
+     * @param string  $id        Cache id
+     * @param integer $timestamp Timestamp used for touch
+     * @return void
+     */
+    public function touch($id, $timestamp = null)
+    {
+        // build cache file path
+        $cachePath = $this->_buildPath($id);
+        
+        if (is_null($timestamp)) {
+            $timestamp = time();
+        }
+        
+        // remove cache file
+        $this->_touch($cachePath, $timestamp);
     }
 
     /**
@@ -246,7 +266,14 @@ class Peach_Cache_Adapter_File extends Peach_Cache_Adapter_Abstract
                 throw new Peach_Cache_Exception('Failed to unlock cache file "' . $cachePath . '"');
             }
         } else {
-            $writeResult = file_put_contents($handle);
+            // write data to cache file
+            Peach_Error_Handler::start();
+            $writeResult = fwrite($handle, $data);
+            $error = Peach_Error_Handler::stop();
+            
+            if (!is_null($error)) {
+                throw new Peach_Cache_Exception('Failed to write to cache file "' . $cachePath . '": ' . $error);
+            }
         }
         
         if (false === $writeResult) {
@@ -396,6 +423,30 @@ class Peach_Cache_Adapter_File extends Peach_Cache_Adapter_Abstract
         
         if (false === $removeResult) {
             throw new Peach_Cache_Exception('Failed to delete cache file "' . $cachePath . '"');
+        }
+    }
+    
+    /**
+     * Touch the timestamp of a cache item.
+     *
+     * @param string  $id        Cache id
+     * @param integer $timestamp Timestamp used for touch
+     * @return void
+     * @throws Peach_Cache_Exception
+     */
+    protected function _touch($cachePath, $timestamp)
+    {
+        Peach_Error_Handler::start();
+        // touch cache file
+        $touchResult = touch($cachePath, $timestamp);
+        $error = Peach_Error_Handler::stop();
+        
+        if (!is_null($error)) {
+            throw new Peach_Cache_Exception('Failed to touch the cache file "' . $cachePath . '": ' . $error);
+        }
+        
+        if (false === $touchResult) {
+            throw new Peach_Cache_Exception('Failed to touch the cache file "' . $cachePath . '"');
         }
     }
     

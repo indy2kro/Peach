@@ -226,7 +226,6 @@ class Peach_Cache
         if (!$this->_options[self::OPT_ENABLED]) {
             // restore original options
             $this->_options = $originalOptions;
-            
             return true;
         }
         
@@ -245,7 +244,7 @@ class Peach_Cache
         $data = $this->_applyInputFilters($data);
         
         // save to adapter
-        $result = $this->_adapter->save($data, $id, $tags);
+        $this->_adapter->save($data, $id, $tags);
         
         if ($this->_options[self::OPT_IGNORE_USER_ABORT]) {
             ignore_user_abort($abort);
@@ -253,7 +252,38 @@ class Peach_Cache
         
         // restore original options
         $this->_options = $originalOptions;
-        return $result;
+        return true;
+    }
+
+    /**
+     * Remove a cache
+     *
+     * @param string             $id                Cache id
+     * @param integer            $timestamp         Timestamp
+     * @param array|Peach_Config $contextualOptions Contextual options
+     * @return boolean
+     */
+    public function touch($id, $timestamp = null, $contextualOptions = array())
+    {
+        // backup existing options
+        $originalOptions = $this->_options;
+        $this->setOptions($contextualOptions);
+        
+        if (!$this->_options[self::OPT_ENABLED]) {
+            // restore original options
+            $this->_options = $originalOptions;
+            return true;
+        }
+        
+        // format id
+        $id = $this->_formatId($id);
+                
+        // run method from adapter
+        $this->_adapter->touch($id, $timestamp);
+        
+        // restore original options
+        $this->_options = $originalOptions;
+        return true;
     }
 
     /**
@@ -272,19 +302,18 @@ class Peach_Cache
         if (!$this->_options[self::OPT_ENABLED]) {
             // restore original options
             $this->_options = $originalOptions;
-            
             return true;
         }
         
         // format id
         $id = $this->_formatId($id);
                 
-        // save to adapter
-        $result = $this->_adapter->remove($id);
+        // run method from adapter
+        $this->_adapter->remove($id);
         
         // restore original options
         $this->_options = $originalOptions;
-        return $result;
+        return true;
     }
 
     /**

@@ -87,7 +87,7 @@ abstract class Peach_Cache_Adapter_Abstract
      * @param string $data Data to cache
      * @param string $id   Cache id
      * @param array  $tags Array of strings, the cache record will be tagged by each string entry
-     * @return boolean
+     * @return void
      */
     abstract public function save($data, $id, Array $tags = array());
 
@@ -95,9 +95,18 @@ abstract class Peach_Cache_Adapter_Abstract
      * Remove a cache record
      *
      * @param string $id Cache id
-     * @return boolean True if no problem
+     * @return void
      */
     abstract public function remove($id);
+
+    /**
+     * Touch the timestamp of a cache item. If no timestamp is provided, the current timestamp is used
+     *
+     * @param string  $id        Cache id
+     * @param integer $timestamp Timestamp used for touch
+     * @return void
+     */
+    abstract public function touch($id, $timestamp = null);
 
     /**
      * Clean some cache records
@@ -146,7 +155,7 @@ abstract class Peach_Cache_Adapter_Abstract
                 break;
             
             default:
-                throw new Peach_Cache_Exception('Invalid token method "' . $method . '"');
+                throw new Peach_Cache_Exception('Invalid token method "' . $this->_options[self::OPT_TOKEN_METHOD] . '"');
                 break;
         }
         
