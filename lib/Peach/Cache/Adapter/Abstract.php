@@ -71,7 +71,7 @@ abstract class Peach_Cache_Adapter_Abstract
      * @param string $id Cache id
      * @return string|null Cached data
      */
-    public function load($id);
+    abstract public function load($id);
 
     /**
      * Test if a cache is available or not (for the given id)
@@ -79,7 +79,7 @@ abstract class Peach_Cache_Adapter_Abstract
      * @param string $id cache id
      * @return boolean
      */
-    public function test($id);
+    abstract public function test($id);
 
     /**
      * Save some string data into a cache record
@@ -89,7 +89,7 @@ abstract class Peach_Cache_Adapter_Abstract
      * @param array  $tags Array of strings, the cache record will be tagged by each string entry
      * @return boolean
      */
-    public function save($data, $id, Array $tags = array());
+    abstract public function save($data, $id, Array $tags = array());
 
     /**
      * Remove a cache record
@@ -97,7 +97,7 @@ abstract class Peach_Cache_Adapter_Abstract
      * @param string $id Cache id
      * @return boolean True if no problem
      */
-    public function remove($id);
+    abstract public function remove($id);
 
     /**
      * Clean some cache records
@@ -113,7 +113,7 @@ abstract class Peach_Cache_Adapter_Abstract
      * @param array  $tags Array of tags
      * @return boolean true if no problem
      */
-    public function clean($mode = Peach_Cache::CLEANING_MODE_ALL, Array $tags = array());
+    abstract public function clean($mode = Peach_Cache::CLEANING_MODE_ALL, Array $tags = array());
     
     /**
      * Get token based on id

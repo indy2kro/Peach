@@ -136,7 +136,7 @@ class Peach_Cache
      *
      * @param string             $id                Cache id
      * @param array|Peach_Config $contextualOptions Contextual options
-     * @return mixed|false Cached data
+     * @return mixed|null Cached data
      */
     public function load($id, $contextualOptions = array())
     {
@@ -156,7 +156,7 @@ class Peach_Cache
         // load data
         $data = $this->_adapter->load($id);
         
-        if (false === $data) {
+        if (is_null($data)) {
             // restore original options
             $this->_options = $originalOptions;
             
@@ -182,7 +182,7 @@ class Peach_Cache
      *
      * @param string             $id                Cache id
      * @param array|Peach_Config $contextualOptions Contextual options
-     * @return integer|false Last modified time of cache entry if it is available, false otherwise
+     * @return boolean
      */
     public function test($id, $contextualOptions = array())
     {

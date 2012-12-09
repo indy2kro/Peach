@@ -53,7 +53,7 @@ class Peach_Cache_Adapter_File extends Peach_Cache_Adapter_Abstract
         
         // check if the cache is still available
         $cacheTest = $this->_test($cachePath);
-        
+
         if (!$cacheTest) {
             return null;
         }
@@ -74,6 +74,11 @@ class Peach_Cache_Adapter_File extends Peach_Cache_Adapter_Abstract
     {
         // build cache file path
         $cachePath = $this->_buildPath($id);
+        
+        // check if cache file exists
+        if (!file_exists($cachePath)) {
+            return false;
+        }
         
         // check if the cache is still available
         $cacheTest = $this->_test($cachePath);
@@ -161,8 +166,8 @@ class Peach_Cache_Adapter_File extends Peach_Cache_Adapter_Abstract
     {
         $lastModifiedTime = $this->_getLastModifiedTime($cachePath);
         $expireTime = $this->_computeExpireTime();
-        
-        if ($lastModifiedTime >= $expireTime) {
+
+        if ($lastModifiedTime <= $expireTime) {
             return false;
         }
         
@@ -241,10 +246,10 @@ class Peach_Cache_Adapter_File extends Peach_Cache_Adapter_Abstract
                 throw new Peach_Cache_Exception('Failed to unlock cache file "' . $cachePath . '"');
             }
         } else {
-            $cache = stream_get_contents($handle);
+            $writeResult = file_put_contents($handle);
         }
         
-        if (false === $cache) {
+        if (false === $writeResult) {
             throw new Peach_Cache_Exception('Failed to read from the cache file "' . $cachePath . '"');
         }
         
