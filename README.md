@@ -3,18 +3,6 @@ Peach
 
 PHP Peach Library - currently under development.
 
-Development Status
-=====
-
-Current modules under development:
-
- * Cache
-
-Build status
-=====
-
-[![Build Status](https://buildhive.cloudbees.com/job/indy2kro/job/Peach/badge/icon)](https://buildhive.cloudbees.com/job/indy2kro/job/Peach/)
-
 Coding Style Guide
 =====
 
