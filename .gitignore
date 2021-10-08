@@ -2,3 +2,7 @@
 /doc/
 /tests/phpunit.xml
 /_internal/
+/vendor/
+/composer.lock
+/.phpunit.result.cache
+/.phplint-cache

@@ -6,7 +6,7 @@
  * @package    Peach_Service_Tinyurl
  * @author     Cristi RADU <indy2kro@yahoo.com>
  * @copyright  Copyright (c) 2012 Peach Library
- * @see        http://tinyurl.com/
+ * @see        https://tinyurl.com/
  */
 
 /**
@@ -22,7 +22,7 @@ class Peach_Service_Tinyurl
     /*
      * API url
      */
-    const API_URL = 'http://tinyurl.com/api-create.php';
+    const API_URL = 'https://tinyurl.com/api-create.php';
     
     /*
      * Available parameters
